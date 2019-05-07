@@ -1,4 +1,73 @@
-body ,h1{
+body ,h1, h2, h3, p, img, input, textarea, li, ul, ol{
     padding: 0;
     margin: 0; 
 }
+
+li {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+input, textarea {
+    outline: none;
+    resize: none;
+}
+
+// 文字省略号
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .i-b {
+    display: inline-block;
+  } 
+  
+  .t-c {
+    text-align: center;
+  }
+  
+  .flex {
+    display: flex;
+  }
+  
+  .flex-item {
+    flex: 1;
+  }
+  
+  .flex-row {
+    flex-direction: row;
+  }
+  
+  .flex-colmun {
+    flex-direction: column;
+  }
+  
+  .align-center {
+    align-items: center;
+  }
+  
+  .flex-center {
+    justify-content: center;
+  }
+  
+  .space-around {
+    justify-content: space-around;
+  }
+  
+  .space-between {
+    justify-content: space-between;
+  }
+
+
+
+// 定义变量
+@rem: 1/75rem;
+
+//   主题颜色
+@baseColor: #539BED;
+

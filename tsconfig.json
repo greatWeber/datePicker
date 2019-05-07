@@ -3,7 +3,7 @@
         "src/ts/**.ts"
     ],
     "compilerOptions": {
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "target": "es2015"
     }
 }

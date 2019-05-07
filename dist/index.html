@@ -5,9 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <link rel="stylesheet" href="./css/datePicker.css">
+    <script src="./plug/flexible.js"></script>
 </head>
 <body>
-    
+<div class="picker-mask"></div>
+
+<div class="picker-wrapper">
+    <div class="picker-head flex space-between">
+        <span class="cancel">取消</span>
+        <span class="sure">确定</span>
+    </div>
+    <div class="picker-body">
+        <div class="picker-range">
+            <p class="start-time">2018-03-01</p>
+            <span>至</span>
+            <p class="end-time range-act">结束日期</p>
+        </div>
+
+        <div class="date-content flex">
+
+            <div class="date-group flex-item">
+                    <div class="content-mask mask-top"></div>
+                    <div class="content-mask mask-bottom"></div>
+                    <div class="date-item ">
+                        <p class="date-unit">2017年</p>
+                        <p class="date-unit">2018年</p>
+                        <p class="date-unit">2019年</p>
+                        <p class="date-unit">2019年</p>
+                    </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    <p class="date-unit">2017年</p>
+                    <p class="date-unit">2018年</p>
+                    <p class="date-unit">2019年</p>
+                    <p class="date-unit">2019年</p>
+                </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    <p class="date-unit">2017年</p>
+                    <p class="date-unit">2018年</p>
+                    <p class="date-unit">2019年</p>
+                    <p class="date-unit">2019年</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 <script src="./js/datePicker.js"></script>
 </body>

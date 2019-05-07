@@ -55,6 +55,7 @@ const Ts = function () {
         extensions: ['.ts']
     })
     .bundle()
+    .pipe(plumber())
     .pipe(source('datePicker.js'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
