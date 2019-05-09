@@ -6,11 +6,12 @@ export const mask = `
 
 export const range = `
 <div class="picker-range">
-    <p class="start-time">2018-03-01</p>
+    <p class="range-child start-time range-act">开始日期</p>
     <span>至</span>
-    <p class="end-time range-act">结束日期</p>
+    <p class="range-child end-time">结束日期</p>
 </div>
 `;
+
 
 export const picker = `
 <div class="picker-wrapper">

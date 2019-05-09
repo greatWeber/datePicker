@@ -95,3 +95,26 @@
     }
 }
 
+// 自定义提示
+.datePicker-errorTip, .datePicker-successTip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 39;
+    color: #fff;
+    width: 90%;
+    padding: 2% 5%;
+    font-size: 16px;
+    transition: 0.3s all linear;
+    display: none;
+    opacity: 0;
+}
+
+.datePicker-errorTip {
+    background: #ff5555;
+}
+
+.datePicker-successTip {
+    background: #0bda38
+}
+
