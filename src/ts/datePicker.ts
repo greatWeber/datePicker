@@ -157,6 +157,7 @@ export default class DatePicker extends Utils {
 
             this.keyList.push(this.params.key);
             this.key+=1;
+            console.log('key',this.key)
         }
         if(this.keyList.length>this.opt.maxKeyCount){
             console.error(`
@@ -170,6 +171,17 @@ export default class DatePicker extends Utils {
         }
 
         this.render();
+
+        let _this = this;
+        // 返回一个对象,方便调用
+        return {
+            key: _this.params.key,
+            show: ()=>{
+                _this.show(_this.params.key);
+            },
+            hide: _this.hide.bind(_this),
+
+        }
 
     }
 
@@ -188,18 +200,13 @@ export default class DatePicker extends Utils {
             $mask = this.createElm(document.body,'div',maskName);
             this.setCss($mask,{
                 'transition': '0.3s all linear',
-                'opacity': '0'
+                'opacity': '0',
+                'display': 'none'
             });
 
         }
 
         this.mask = $mask;
-
-        _this.sleep(()=>{
-            _this.setCss($mask,{
-                'opacity':'1'
-            })
-        },100)
     }
 
     public createPicker(){ 
@@ -234,14 +241,6 @@ export default class DatePicker extends Utils {
             this.bindEvents(defaultInfo);
             this.rangeOperation();
         }
-
-        
-
-        _this.sleep(() => {
-            _this.setCss($pickerWrapper,{
-                'transform': 'translateY(0)'
-            });
-        }, 100)
 
         // 添加显示状态
         $picker.classList.add('__picker-type-show');
@@ -372,7 +371,7 @@ export default class DatePicker extends Utils {
             })
         });
 
-        this.mask.addEventListener('click',this.hide);
+        this.mask.addEventListener('click',this.hide.bind(_this));
 
     }
 
@@ -469,11 +468,12 @@ export default class DatePicker extends Utils {
             });
         },300);
         // 关闭选择器
-        this.setCss(this.currentPicker,{
+        let $pickerWrapper = this.select(`.picker-wrapper`,this.currentPicker);
+        this.setCss($pickerWrapper,{
             'transform':'translateY(100%)'
         });
-        this.currentPicker.remove('__picker-type-show');
-        this.currentPicker.add('__picker-type-hide');
+        this.currentPicker.classList.remove('__picker-type-show');
+        this.currentPicker.classList.add('__picker-type-hide');
         this.currentPicker = null;
     }
 
@@ -488,18 +488,25 @@ export default class DatePicker extends Utils {
             return;
         }
 
-        let $picker = this.select(`picker-key-${key}`);
+        this.setCss(this.mask,{
+            'opacity': '1',
+            'display': 'block'
+        })
+
+        let $picker = this.select(`.picker-key-${key}`);
+        
         if(!$picker){
             let tip = `
-            没有该key值的选择器
+            没有该key(${key})值的选择器
             请检查是否写错!
             `;
             console.error(tip);
             this.errorTip(tip);
             return;
         }
-
-        this.setCss($picker,{
+        this.currentPicker = $picker;
+        let $pickerWrapper = this.select(`.picker-wrapper`,$picker);
+        this.setCss($pickerWrapper,{
             'transform':'translateY(0px)'
         });
 
@@ -530,7 +537,7 @@ export default class DatePicker extends Utils {
         });
 
         let startTime ='', endTime = '';
-
+        console.log('onchange',`onchange_${this.params.key}`)
         this.$on(`onchange_${this.params.key}`,(data)=>{
             let currentDate = data.join(_this.params.outFormat);
             $rangeChilds[currentIndex].innerHTML = currentDate;

@@ -64,12 +64,22 @@ var DatePicker = function (_utils_1$default) {
             if (!this.keyList.includes(this.params.key)) {
                 this.keyList.push(this.params.key);
                 this.key += 1;
+                console.log('key', this.key);
             }
             if (this.keyList.length > this.opt.maxKeyCount) {
                 console.error("\n            Error:\u68C0\u6D4B\u5230\u9875\u9762\u4E0A\u521B\u5EFA\u7684\u9009\u62E9\u5668\u8FC7\u591A!\n            \u8BF7\u68C0\u67E5\u4EE3\u7801\u662F\u5426\u6709\u95EE\u9898\n            \u8BF7\u4E0D\u8981\u5728\u5FAA\u73AF\u6216\u8005\u4E8B\u4EF6\u4E2D\u91CD\u590D\u8C03\u7528.picker()\u65B9\u6CD5\n            \u82E5\u975E\u8981\u5982\u6B64\u8C03\u7528\uFF0C\u4E00\u5B9A\u8981\u52A0\u4E0Akey\u5C5E\u6027\n            \u5EFA\u8BAE\u5728\u5916\u9762\u8C03\u7528.picker()\u65B9\u6CD5\uFF0C\u5728\u91CC\u9762\u8C03\u7528.show()\u65B9\u6CD5\u663E\u793A\n            ");
                 return;
             }
             this.render();
+            var _this = this;
+            // 返回一个对象,方便调用
+            return {
+                key: _this.params.key,
+                show: function show() {
+                    _this.show(_this.params.key);
+                },
+                hide: _this.hide.bind(_this)
+            };
         }
     }, {
         key: "render",
@@ -88,15 +98,11 @@ var DatePicker = function (_utils_1$default) {
                 $mask = this.createElm(document.body, 'div', maskName);
                 this.setCss($mask, {
                     'transition': '0.3s all linear',
-                    'opacity': '0'
+                    'opacity': '0',
+                    'display': 'none'
                 });
             }
             this.mask = $mask;
-            _this.sleep(function () {
-                _this.setCss($mask, {
-                    'opacity': '1'
-                });
-            }, 100);
         }
     }, {
         key: "createPicker",
@@ -127,11 +133,6 @@ var DatePicker = function (_utils_1$default) {
                 this.bindEvents(defaultInfo);
                 this.rangeOperation();
             }
-            _this.sleep(function () {
-                _this.setCss($pickerWrapper, {
-                    'transform': 'translateY(0)'
-                });
-            }, 100);
             // 添加显示状态
             $picker.classList.add('__picker-type-show');
             this.currentPicker = $picker || {}; //保存当前的选择器
@@ -258,7 +259,7 @@ var DatePicker = function (_utils_1$default) {
                     console.log('touchEnd', EndY);
                 });
             });
-            this.mask.addEventListener('click', this.hide);
+            this.mask.addEventListener('click', this.hide.bind(_this));
         }
     }, {
         key: "touchStart",
@@ -360,11 +361,12 @@ var DatePicker = function (_utils_1$default) {
                 });
             }, 300);
             // 关闭选择器
-            this.setCss(this.currentPicker, {
+            var $pickerWrapper = this.select(".picker-wrapper", this.currentPicker);
+            this.setCss($pickerWrapper, {
                 'transform': 'translateY(100%)'
             });
-            this.currentPicker.remove('__picker-type-show');
-            this.currentPicker.add('__picker-type-hide');
+            this.currentPicker.classList.remove('__picker-type-show');
+            this.currentPicker.classList.add('__picker-type-hide');
             this.currentPicker = null;
         }
     }, {
@@ -376,14 +378,20 @@ var DatePicker = function (_utils_1$default) {
                 this.errorTip(tip);
                 return;
             }
-            var $picker = this.select("picker-key-" + key);
+            this.setCss(this.mask, {
+                'opacity': '1',
+                'display': 'block'
+            });
+            var $picker = this.select(".picker-key-" + key);
             if (!$picker) {
-                var _tip = "\n            \u6CA1\u6709\u8BE5key\u503C\u7684\u9009\u62E9\u5668\n            \u8BF7\u68C0\u67E5\u662F\u5426\u5199\u9519!\n            ";
+                var _tip = "\n            \u6CA1\u6709\u8BE5key(" + key + ")\u503C\u7684\u9009\u62E9\u5668\n            \u8BF7\u68C0\u67E5\u662F\u5426\u5199\u9519!\n            ";
                 console.error(_tip);
                 this.errorTip(_tip);
                 return;
             }
-            this.setCss($picker, {
+            this.currentPicker = $picker;
+            var $pickerWrapper = this.select(".picker-wrapper", $picker);
+            this.setCss($pickerWrapper, {
                 'transform': 'translateY(0px)'
             });
             $picker.classList.remove('__picker-type-hide');
@@ -411,6 +419,7 @@ var DatePicker = function (_utils_1$default) {
             });
             var startTime = '',
                 endTime = '';
+            console.log('onchange', "onchange_" + this.params.key);
             this.$on("onchange_" + this.params.key, function (data) {
                 var currentDate = data.join(_this.params.outFormat);
                 $rangeChilds[currentIndex].innerHTML = currentDate;
@@ -515,11 +524,22 @@ exports.default = DatePicker;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var datePicker_1 = require("./datePicker");
-var datePicker = new datePicker_1.default();
-datePicker.picker({
+var datePicker1 = new datePicker_1.default();
+var picker1 = datePicker1.picker({
     onchange: function onchange(data) {
         console.log('onchange', data);
     }
+});
+var picker2 = datePicker1.picker({
+    onchange: function onchange(data) {
+        console.log('onchange', data);
+    }
+});
+document.querySelectorAll('.picker')[0].addEventListener('click', function () {
+    picker1.show();
+});
+document.querySelectorAll('.picker')[1].addEventListener('click', function () {
+    picker2.show();
 });
 
 },{"./datePicker":1}],3:[function(require,module,exports){
