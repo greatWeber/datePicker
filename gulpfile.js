@@ -51,8 +51,8 @@ const Ts = function () {
     })
     .plugin(tsify)
     .transform('babelify', {
-        presets: ['es2015'],
-        extensions: ['.ts']
+        presets: ['stage-0','es2015'],
+        extensions: ['.ts','.js']
     })
     .bundle()
     .pipe(plumber())

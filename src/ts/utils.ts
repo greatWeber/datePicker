@@ -67,8 +67,20 @@ export default class Utils {
         }
     }
 
-    public assign(){
+    public assign(extended,options){
+        for (let property in options) {
+            try { 
+              if (options[property].constructor == Object) {
+                extended[property] = this.assign(extended[property], options[property]);
+              } else {
+                extended[property] = options[property];
+              }
+            } catch (ex) {
+              extended[property] = options[property];
+            }
+          }
         
+          return extended;
     }
 
     // 自定义提示
@@ -90,7 +102,7 @@ export default class Utils {
             _this.setCss($tip,{
                 'opacity': '0'
             })
-        },timeout|| 1000)
+        },timeout|| 2000)
 
         this.sleep(()=>{
             _this.setCss($tip,{

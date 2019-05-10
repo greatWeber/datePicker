@@ -12,7 +12,7 @@ interface pickers {
         defaultDate?: string;
         key?: number;
         outFormat ?: string;
-        onchange?: Function;
+        onchange?: Function; 
         success?: Function;
         type?: string; //选择器类型：single, range, 
 
@@ -110,9 +110,9 @@ export default class BasePicker extends Utils {
     private _height :number = 0; //选择器格子的高度
     
 
-    constructor(options?: object){
-        super();
-        this.opt = Object.assign({
+    constructor(options?: object){  
+        super();  
+        this.opt = this.assign({
             onchange: ()=>{},
             success: ()=>{}
         },options);
@@ -127,7 +127,7 @@ export default class BasePicker extends Utils {
     
 
     public picker(params?: pickers){
-        this.params = Object.assign({ 
+        this.params = this.assign({ 
             startYear: '1990',
             endYear: '2030',
             defaultDate: this.getToday('-'),
@@ -144,6 +144,7 @@ export default class BasePicker extends Utils {
     }
 
     public render(){ 
+        // 渲染函数，一般要在子类重写
         this.createMask();
         this.createPicker();
         
@@ -176,10 +177,8 @@ export default class BasePicker extends Utils {
         let _this = this;
         
         if(!$picker){
-            let yearStr = this.createYearStr();
-            let pickerHtml = temp.picker.replace('$1',yearStr)
-                                        .replace('$2',this.monthStr)
-                                        .replace('$3',this.dayStr);
+            
+            let pickerHtml = this.renderHtml();
             // console.log('picker',pickerHtml);
             $picker = this.createElm(document.body,'div',pickerName);
             $picker.innerHTML = pickerHtml;
@@ -202,6 +201,14 @@ export default class BasePicker extends Utils {
         $picker.classList.add('__picker-type-show');
         this.currentPicker = $picker || {}; //保存当前的选择器
         this.currentPicker.years = this.getYearArray();
+    }
+
+    public renderHtml(): string{
+        // 获取html样式的函数，注意，该函数一般要在子类重写
+        let yearStr = this.createYearStr();
+        return temp.picker.replace('$1',yearStr)
+                            .replace('$2',this.monthStr)
+                            .replace('$3',this.dayStr);
     }
 
     public getYearArray(): Array<number>{
@@ -307,26 +314,38 @@ export default class BasePicker extends Utils {
 
         let $dateGroups = this.selectAll('.date-group',this.currentPicker);
         let _this = this;
-        $dateGroups.forEach((dateGroup,i)=>{
+        Array.prototype.slice.call($dateGroups).forEach((dateGroup,i)=>{
             let $dateUtils = _this.select('.date-item',dateGroup);
             
             _this.setCss($dateUtils,{
                 'transition':'0.1s all linear' 
-            });
+            });   
             // 注意：EndY的值不应该为0，而是调用默认视图函数后的距离
             let EndY: number = defaultInfo.heightArray[i];
 
             let touchs = new Touchs(dateGroup);
-            touchs.touchStart((e: any, range: number)=>{
-                _this.touchStart(e,$dateUtils);
-            });
-            touchs.touchMove((e: any, range: number)=>{
-                _this.touchMove(e,range,EndY,$dateUtils);
-            });
-            touchs.touchEnd((e:any, endY: number)=>{
-                EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
-                console.log('touchEnd',EndY)
+            touchs.init({
+                startCb: (e: any, range: number)=>{
+                    _this.touchStart(e,$dateUtils);
+                },
+                moveCb: (e: any, range: number)=>{
+                    _this.touchMove(e,range,EndY,$dateUtils); 
+                },
+                endCb: (e:any, endY: number)=>{
+                    EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
+                    console.log('touchEnd',EndY) 
+                }
             })
+            // touchs.touchStart((e: any, range: number)=>{
+            //     _this.touchStart(e,$dateUtils);
+            // });
+            // touchs.touchMove((e: any, range: number)=>{
+            //     _this.touchMove(e,range,EndY,$dateUtils); 
+            // });
+            // touchs.touchEnd((e:any, endY: number)=>{
+            //     EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
+            //     console.log('touchEnd',EndY)
+            // })
         });
 
         this.mask.addEventListener('click',this.hide.bind(_this));
@@ -505,12 +524,12 @@ export default class BasePicker extends Utils {
         let $rangeChilds = this.selectAll('.range-child',$picker);
         let currentIndex = 0;
         let _this = this;
-        $rangeChilds.forEach((rangeChild,i)=>{
+        Array.prototype.slice.call($rangeChilds).forEach((rangeChild,i)=>{
             console.log('rangeChild',rangeChild);
             rangeChild.addEventListener('click',(e)=>{
                 console.log(e)
                 if(e.target.classList.contains('range-act'))return;
-                $rangeChilds.forEach(item => {
+                Array.prototype.slice.call($rangeChilds).forEach(item => {
 
                     item.classList.remove('range-act')
                 });

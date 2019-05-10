@@ -34,7 +34,7 @@ var BasePicker = function (_utils_1$default) {
         _this2._mask = null; //保存唯一的遮罩
         // 辅助类变量
         _this2._height = 0; //选择器格子的高度
-        _this2.opt = Object.assign({
+        _this2.opt = _this2.assign({
             onchange: function onchange() {},
             success: function success() {}
         }, options);
@@ -46,7 +46,7 @@ var BasePicker = function (_utils_1$default) {
     _createClass(BasePicker, [{
         key: "picker",
         value: function picker(params) {
-            this.params = Object.assign({
+            this.params = this.assign({
                 startYear: '1990',
                 endYear: '2030',
                 defaultDate: this.getToday('-'),
@@ -61,6 +61,7 @@ var BasePicker = function (_utils_1$default) {
     }, {
         key: "render",
         value: function render() {
+            // 渲染函数，一般要在子类重写
             this.createMask();
             this.createPicker();
         }
@@ -90,8 +91,7 @@ var BasePicker = function (_utils_1$default) {
             var $pickerWrapper = this.select("." + pickerName + " .picker-wrapper");
             var _this = this;
             if (!$picker) {
-                var yearStr = this.createYearStr();
-                var pickerHtml = temp.picker.replace('$1', yearStr).replace('$2', this.monthStr).replace('$3', this.dayStr);
+                var pickerHtml = this.renderHtml();
                 // console.log('picker',pickerHtml);
                 $picker = this.createElm(document.body, 'div', pickerName);
                 $picker.innerHTML = pickerHtml;
@@ -113,6 +113,13 @@ var BasePicker = function (_utils_1$default) {
             $picker.classList.add('__picker-type-show');
             this.currentPicker = $picker || {}; //保存当前的选择器
             this.currentPicker.years = this.getYearArray();
+        }
+    }, {
+        key: "renderHtml",
+        value: function renderHtml() {
+            // 获取html样式的函数，注意，该函数一般要在子类重写
+            var yearStr = this.createYearStr();
+            return temp.picker.replace('$1', yearStr).replace('$2', this.monthStr).replace('$3', this.dayStr);
         }
     }, {
         key: "getYearArray",
@@ -217,7 +224,7 @@ var BasePicker = function (_utils_1$default) {
             }
             var $dateGroups = this.selectAll('.date-group', this.currentPicker);
             var _this = this;
-            $dateGroups.forEach(function (dateGroup, i) {
+            Array.prototype.slice.call($dateGroups).forEach(function (dateGroup, i) {
                 var $dateUtils = _this.select('.date-item', dateGroup);
                 _this.setCss($dateUtils, {
                     'transition': '0.1s all linear'
@@ -225,16 +232,28 @@ var BasePicker = function (_utils_1$default) {
                 // 注意：EndY的值不应该为0，而是调用默认视图函数后的距离
                 var EndY = defaultInfo.heightArray[i];
                 var touchs = new touch_1.default(dateGroup);
-                touchs.touchStart(function (e, range) {
-                    _this.touchStart(e, $dateUtils);
+                touchs.init({
+                    startCb: function startCb(e, range) {
+                        _this.touchStart(e, $dateUtils);
+                    },
+                    moveCb: function moveCb(e, range) {
+                        _this.touchMove(e, range, EndY, $dateUtils);
+                    },
+                    endCb: function endCb(e, endY) {
+                        EndY = _this.touchEnd(e, endY, EndY, $dateUtils, i, defaultInfo.dateArray);
+                        console.log('touchEnd', EndY);
+                    }
                 });
-                touchs.touchMove(function (e, range) {
-                    _this.touchMove(e, range, EndY, $dateUtils);
-                });
-                touchs.touchEnd(function (e, endY) {
-                    EndY = _this.touchEnd(e, endY, EndY, $dateUtils, i, defaultInfo.dateArray);
-                    console.log('touchEnd', EndY);
-                });
+                // touchs.touchStart((e: any, range: number)=>{
+                //     _this.touchStart(e,$dateUtils);
+                // });
+                // touchs.touchMove((e: any, range: number)=>{
+                //     _this.touchMove(e,range,EndY,$dateUtils); 
+                // });
+                // touchs.touchEnd((e:any, endY: number)=>{
+                //     EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
+                //     console.log('touchEnd',EndY)
+                // })
             });
             this.mask.addEventListener('click', this.hide.bind(_this));
         }
@@ -411,12 +430,12 @@ var BasePicker = function (_utils_1$default) {
             var $rangeChilds = this.selectAll('.range-child', $picker);
             var currentIndex = 0;
             var _this = this;
-            $rangeChilds.forEach(function (rangeChild, i) {
+            Array.prototype.slice.call($rangeChilds).forEach(function (rangeChild, i) {
                 console.log('rangeChild', rangeChild);
                 rangeChild.addEventListener('click', function (e) {
                     console.log(e);
                     if (e.target.classList.contains('range-act')) return;
-                    $rangeChilds.forEach(function (item) {
+                    Array.prototype.slice.call($rangeChilds).forEach(function (item) {
                         item.classList.remove('range-act');
                     });
                     e.target.classList.add('range-act');
@@ -549,7 +568,7 @@ var BasePicker = function (_utils_1$default) {
 
 exports.default = BasePicker;
 
-},{"./template":4,"./touch":5,"./utils":6}],2:[function(require,module,exports){
+},{"./template":5,"./touch":6,"./utils":7}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -561,6 +580,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Object.defineProperty(exports, "__esModule", { value: true });
+// import "babel-polyfill";
+var polyfill_1 = require("./polyfill");
+polyfill_1.default();
 var utils_1 = require("./utils");
 var basePicker_1 = require("./basePicker");
 
@@ -585,7 +607,7 @@ var DatePicker = function (_utils_1$default) {
     _createClass(DatePicker, [{
         key: "globalOptions",
         value: function globalOptions(opt) {
-            this.opt = Object.assign({
+            this.opt = this.assign({
                 maxKeyCount: this._maxKeyCount,
                 onchange: function onchange() {},
                 success: function success() {}
@@ -597,7 +619,7 @@ var DatePicker = function (_utils_1$default) {
         value: function picker(params) {
             var _this2 = this;
 
-            this.params = Object.assign({
+            this.params = this.assign({
                 startYear: '1990',
                 endYear: '2030',
                 defaultDate: this.getToday('-'),
@@ -683,7 +705,7 @@ var DatePicker = function (_utils_1$default) {
 var datePicker = new DatePicker();
 exports.default = datePicker;
 
-},{"./basePicker":1,"./utils":6}],3:[function(require,module,exports){
+},{"./basePicker":1,"./polyfill":4,"./utils":7}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -698,19 +720,100 @@ var picker1 = datePicker_1.default.picker({
         console.log('onchange', data);
     }
 });
+console.log('-----------------------');
 var picker2 = datePicker_1.default.picker({
     onchange: function onchange(data) {
         console.log('onchange', data);
     }
 });
-document.querySelectorAll('.picker')[0].addEventListener('click', function () {
+document.getElementsByClassName('picker')[0].addEventListener('click', function () {
+    console.log('click');
     picker1.show();
 });
-document.querySelectorAll('.picker')[1].addEventListener('click', function () {
+document.getElementsByClassName('picker')[1].addEventListener('click', function () {
     picker2.show();
 });
 
 },{"./datePicker":2}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+// es6补丁
+var polyfill = function polyfill() {
+  // includes
+  if (!Array.prototype.includes) {
+    Object.defineProperty(Array.prototype, 'includes', {
+      value: function value(searchElement, fromIndex) {
+        if (this == null) {
+          throw new TypeError('"this" is null or not defined');
+        }
+        var o = Object(this);
+        var len = o.length >>> 0;
+        if (len === 0) {
+          return false;
+        }
+        var n = fromIndex | 0;
+        var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+        while (k < len) {
+          if (o[k] === searchElement) {
+            return true;
+          }
+          k++;
+        }
+        return false;
+      }
+    });
+  }
+
+  if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+      value: function value(predicate) {
+        // 1. Let O be ? ToObject(this value).
+        if (this == null) {
+          throw new TypeError('"this" is null or not defined');
+        }
+
+        var o = Object(this);
+
+        // 2. Let len be ? ToLength(? Get(O, "length")).
+        var len = o.length >>> 0;
+
+        // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+        if (typeof predicate !== 'function') {
+          throw new TypeError('predicate must be a function');
+        }
+
+        // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+        var thisArg = arguments[1];
+
+        // 5. Let k be 0.
+        var k = 0;
+
+        // 6. Repeat, while k < len
+        while (k < len) {
+          // a. Let Pk be ! ToString(k).
+          // b. Let kValue be ? Get(O, Pk).
+          // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+          // d. If testResult is true, return kValue.
+          var kValue = o[k];
+          if (predicate.call(thisArg, kValue, k, o)) {
+            return kValue;
+          }
+          // e. Increase k by 1.
+          k++;
+        }
+
+        // 7. Return undefined.
+        return undefined;
+      }
+    });
+  }
+};
+exports.default = polyfill;
+
+},{}],5:[function(require,module,exports){
 "use strict";
 // 模板字符串
 
@@ -719,61 +822,100 @@ exports.mask = "\n<div class=\"picker-mask\"></div>\n";
 exports.range = "\n<div class=\"picker-range\">\n    <p class=\"range-child start-time range-act\">\u5F00\u59CB\u65E5\u671F</p>\n    <span>\u81F3</span>\n    <p class=\"range-child end-time\">\u7ED3\u675F\u65E5\u671F</p>\n</div>\n";
 exports.picker = "\n<div class=\"picker-wrapper\">\n    <div class=\"picker-head flex space-between\">\n        <span class=\"cancel picker-btn__cancel\">\u53D6\u6D88</span>\n        <span class=\"sure picker-btn__sure\">\u786E\u5B9A</span>\n    </div>\n    <div class=\"picker-body\">\n        " + exports.range + "\n\n        <div class=\"date-content flex\">\n\n            <div class=\"date-group flex-item\">\n                    <div class=\"content-mask mask-top\"></div>\n                    <div class=\"content-mask mask-bottom\"></div>\n                    <div class=\"date-item \">\n                        $1\n                    </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $2\n                </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $3\n                </div>\n            </div>\n        </div>\n\n    </div>\n</div>\n";
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-Object.defineProperty(exports, "__esModule", { value: true });
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var Touchs = function () {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// import { resolve } from "any-promise";
+var utils_1 = require("./utils");
+
+var Touchs = function (_utils_1$default) {
+    _inherits(Touchs, _utils_1$default);
+
     function Touchs(target) {
         _classCallCheck(this, Touchs);
 
         // 辅助类参数
-        this.bool = true;
-        this.limit = 0; //限流
-        this._startTime = 0;
-        this._endTime = 0;
+        var _this2 = _possibleConstructorReturn(this, (Touchs.__proto__ || Object.getPrototypeOf(Touchs)).call(this));
+
+        _this2.bool = true;
+        _this2.limit = 0; //限流
+        _this2._startTime = 0;
+        _this2._endTime = 0;
+        _this2._supportTouch = "ontouchend" in document; //判断浏览器是否支持touch
+        _this2._touchName = {};
+        _this2._startCb = null;
+        _this2._moveCb = null;
+        _this2._endCb = null;
+        _this2._touchStartHander = null;
+        _this2._touchMoveHander = null;
+        _this2._touchEndHander = null;
         console.log('init');
-        this._target = target;
+        _this2._target = target;
+        _this2.touchName = {
+            start: _this2._supportTouch ? 'touchstart' : 'mousedown',
+            move: _this2._supportTouch ? 'touchmove' : 'mousemove',
+            end: _this2._supportTouch ? 'touchend' : 'mouseup'
+        };
+        return _this2;
     }
 
     _createClass(Touchs, [{
+        key: "init",
+        value: function init(params) {
+            this._startCb = params.startCb;
+            this._moveCb = params.moveCb;
+            this._endCb = params.endCb;
+            this.touchStart();
+        }
+    }, {
+        key: "binds",
+        value: function binds(obj, fn) {
+            var _arguments = arguments;
+
+            return function (e) {
+                // console.log('arg',e); 
+                _arguments[0] = e;
+                fn.apply(obj, _arguments);
+            };
+        }
+    }, {
         key: "touchStart",
-        value: function touchStart(cb) {
+        value: function touchStart() {
             // touchstart:
             // 1. 给target绑定touch事件
             console.log(this.target);
             var _this = this;
-            _this.target.addEventListener('touchstart', function (e) {
-                _this.touchStartHander(e, cb);
-            }, false);
+            this._touchStartHander = this.binds(this, this.touchStartHander);
+            this._touchMoveHander = this.binds(this, this.touchMoveHander);
+            this._touchEndHander = this.binds(this, this.touchEndHander);
+            _this.target.addEventListener(this.touchName.start, this._touchStartHander, false);
         }
     }, {
         key: "touchStartHander",
-        value: function touchStartHander(e, cb) {
-            this.startY = e.touches[0].pageY;
+        value: function touchStartHander() {
+            var e = arguments[0];
+            this.startY = this._supportTouch ? e.touches[0].pageY : e.pageY;
             this._startTime = new Date().getTime();
-            console.log(this.startY);
-            cb(e);
-        }
-    }, {
-        key: "touchMove",
-        value: function touchMove(cb) {
-            // touchmove
-            var _this = this;
-            _this.target.addEventListener('touchmove', function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-                _this.touchMoveHander(e, cb);
-            }, false);
+            this._startCb(e);
+            this.target.addEventListener(this.touchName.move, this._touchMoveHander, false);
+            this.target.addEventListener(this.touchName.end, this._touchEndHander, false);
+            this.target.addEventListener('touchcancel', this._touchEndHander, false);
         }
     }, {
         key: "touchMoveHander",
-        value: function touchMoveHander(e, cb) {
+        value: function touchMoveHander() {
+            var e = arguments[0];
+            e.stopPropagation();
+            e.preventDefault();
             // 限流-start
             this.limit++;
             if (this.limit >= 5) {
@@ -783,40 +925,28 @@ var Touchs = function () {
             if (!this.bool) return;
             this.bool = false;
             // 限流-end
-            this.range = e.touches[0].pageY - this._startY;
-            cb(e, this.range);
-        }
-    }, {
-        key: "touchEnd",
-        value: function touchEnd(cb) {
-            // touchend
-            var _this = this;
-            _this.target.addEventListener('touchend', function (e) {
-                _this.touchEndHander(e, cb);
-            }, false);
-            _this.target.addEventListener('touchcancel', function (e) {
-                _this.touchEndHander(e, cb);
-            }, false);
+            var pageY = this._supportTouch ? e.touches[0].pageY : e.pageY;
+            this.range = pageY - this._startY;
+            this._moveCb(e, this.range);
         }
     }, {
         key: "touchEndHander",
-        value: function touchEndHander(e, cb) {
-            this.target.removeEventListener('touchstart', this.touchStartHander, false);
-            this.target.removeEventListener('touchmove', this.touchMoveHander, false);
-            this.target.removeEventListener('touchend', this.touchEndHander, false);
-            this.target.removeEventListener('touchcancel', this.touchEndHander, false);
-            console.log('-----------------range', this.range);
+        value: function touchEndHander() {
+            var e = arguments[0];
+            var _this = this;
+            // this.target.removeEventListener(this.touchName.start,_this._touchStartHander,false);
+            this.target.removeEventListener(this.touchName.move, this._touchMoveHander, false);
+            this.target.removeEventListener(this.touchName.end, this._touchEndHander, false);
+            this.target.removeEventListener('touchcancel', this._touchEndHander, false);
             this.endY = this.range || 0;
             // 随流效果
             this._endTime = new Date().getTime();
             var rangeTime = (this._endTime - this._startTime) / 1000; //单位: 秒
-            console.log('rangeTime', rangeTime);
             if (this.endY !== 0) {
-                var space = Math.floor(Math.abs(this.endY) / (rangeTime * 10));
-                console.log('space', space, this.endY);
+                var space = Math.floor(Math.abs(this.endY) / (rangeTime * 5));
                 this.endY = this.endY > 0 ? this.endY + space : this.endY - space;
             }
-            cb(e, this.endY);
+            this._endCb(e, this.endY);
         }
     }, {
         key: "target",
@@ -852,14 +982,22 @@ var Touchs = function () {
         set: function set(val) {
             this._range = val;
         }
+    }, {
+        key: "touchName",
+        get: function get() {
+            return this._touchName;
+        },
+        set: function set(val) {
+            this._touchName = val;
+        }
     }]);
 
     return Touchs;
-}();
+}(utils_1.default);
 
 exports.default = Touchs;
 
-},{}],6:[function(require,module,exports){
+},{"./utils":7}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -954,7 +1092,20 @@ var Utils = function () {
         }
     }, {
         key: "assign",
-        value: function assign() {}
+        value: function assign(extended, options) {
+            for (var property in options) {
+                try {
+                    if (options[property].constructor == Object) {
+                        extended[property] = this.assign(extended[property], options[property]);
+                    } else {
+                        extended[property] = options[property];
+                    }
+                } catch (ex) {
+                    extended[property] = options[property];
+                }
+            }
+            return extended;
+        }
         // 自定义提示
 
     }, {
@@ -974,7 +1125,7 @@ var Utils = function () {
                 _this.setCss($tip, {
                     'opacity': '0'
                 });
-            }, timeout || 1000);
+            }, timeout || 2000);
             this.sleep(function () {
                 _this.setCss($tip, {
                     'display': 'none'

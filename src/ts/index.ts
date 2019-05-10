@@ -10,19 +10,19 @@ let picker1 = datePicker.picker({
         console.log('onchange',data);
     }
 });
-
+console.log('-----------------------')
 let picker2 = datePicker.picker({
     onchange:(data)=>{
         console.log('onchange',data);
     }
 });
 
-document.querySelectorAll('.picker')[0].addEventListener('click',()=>{
-
+document.getElementsByClassName('picker')[0].addEventListener('click',()=>{
+    console.log('click')
     picker1.show();
 })
 
-document.querySelectorAll('.picker')[1].addEventListener('click',()=>{
+document.getElementsByClassName('picker')[1].addEventListener('click',()=>{
 
     picker2.show(); 
 })

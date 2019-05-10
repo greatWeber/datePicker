@@ -1,6 +1,6 @@
-import { resolve } from "any-promise";
-
-export default class Touchs {
+// import { resolve } from "any-promise";
+import Utils from './utils';
+export default class Touchs extends Utils {
     private _target: any;
     private _startY: number;
     private _endY: number;
@@ -11,10 +11,24 @@ export default class Touchs {
     private limit: number = 0; //限流
     private _startTime: number = 0;
     private _endTime: number =0;
+    private _supportTouch: boolean = "ontouchend" in document; //判断浏览器是否支持touch
+    private _touchName: any = {};
+    private _startCb: Function = null;
+    private _moveCb: Function = null;
+    private _endCb: Function = null;
+    private _touchStartHander: any = null;
+    private _touchMoveHander: any = null;
+    private _touchEndHander: any = null;
 
     constructor(target: any){
+        super();
         console.log('init')
         this._target = target;
+        this.touchName = {
+            start: this._supportTouch? 'touchstart':'mousedown',
+            move: this._supportTouch? 'touchmove':'mousemove',
+            end: this._supportTouch? 'touchend':'mouseup',
+        }
     }
 
     get target(): any{
@@ -51,35 +65,57 @@ export default class Touchs {
         this._range = val;
     }
 
+    get touchName(): any {
+        return this._touchName;
+    }
 
-    public touchStart(cb: Function){
+    set touchName(val: any){
+        this._touchName = val;
+    }
+
+    public init(params?: any){
+        this._startCb = params.startCb;
+        this._moveCb = params.moveCb;
+        this._endCb = params.endCb;
+
+        this.touchStart();
+    }
+
+    private binds(obj,fn){
+        return (e)=>{
+            // console.log('arg',e); 
+            arguments[0] = e;
+            fn.apply(obj, arguments);
+        }
+    }
+
+    private touchStart(){
         // touchstart:
         // 1. 给target绑定touch事件
         console.log(this.target)  
         let _this = this;
-        _this.target.addEventListener('touchstart',(e: any)=>{
-            _this.touchStartHander(e,cb);
-        },false)
+        this._touchStartHander = this.binds(this,this.touchStartHander);
+        this._touchMoveHander = this.binds(this,this.touchMoveHander);
+        this._touchEndHander = this.binds(this,this.touchEndHander);
+        _this.target.addEventListener(this.touchName.start,this._touchStartHander,false);
+        
     }
 
-    private touchStartHander(e: any, cb: Function){
-        this.startY = e.touches[0].pageY;
+    private touchStartHander(){
+        let e = arguments[0]
+        this.startY = this._supportTouch?e.touches[0].pageY: e.pageY;
         this._startTime = new Date().getTime();
-        console.log(this.startY);
-        cb(e);
+        this._startCb(e);
+        this.target.addEventListener(this.touchName.move,this._touchMoveHander,false);
+        this.target.addEventListener(this.touchName.end,this._touchEndHander,false);
+        this.target.addEventListener('touchcancel',this._touchEndHander,false);
     }
+ 
 
-    public touchMove(cb: Function){
-        // touchmove
-        let _this = this;
-        _this.target.addEventListener('touchmove',(e: any)=>{
-            e.stopPropagation();
-            e.preventDefault();
-            _this.touchMoveHander(e,cb);
-        },false)
-    }
-
-    private touchMoveHander(e: any, cb: Function){
+    private touchMoveHander(){
+        let e = arguments[0];
+        e.stopPropagation();
+        e.preventDefault();
         // 限流-start
         this.limit++;
         if(this.limit>=5){
@@ -89,43 +125,31 @@ export default class Touchs {
         if(!this.bool)return;
         this.bool = false;
         // 限流-end
-        
-        this.range = e.touches[0].pageY - this._startY;
-        cb(e,this.range);
+        let pageY = this._supportTouch?e.touches[0].pageY: e.pageY;
+        this.range = pageY - this._startY;
+        this._moveCb(e,this.range);
     }
 
-    public touchEnd(cb: Function){
-        // touchend
+
+    private touchEndHander(){ 
+        let e = arguments[0];
         let _this = this;
-        _this.target.addEventListener('touchend',(e: any)=>{
-            _this.touchEndHander(e,cb);
-        },false);
-
-        _this.target.addEventListener('touchcancel',(e: any)=>{
-            _this.touchEndHander(e,cb);
-        },false);
-
-    }
-
-    private touchEndHander(e: any, cb: Function){
-        this.target.removeEventListener('touchstart',this.touchStartHander,false);
-        this.target.removeEventListener('touchmove',this.touchMoveHander,false);
-        this.target.removeEventListener('touchend',this.touchEndHander,false);
-        this.target.removeEventListener('touchcancel',this.touchEndHander,false);
+        // this.target.removeEventListener(this.touchName.start,_this._touchStartHander,false);
+        this.target.removeEventListener(this.touchName.move,this._touchMoveHander,false);
+        this.target.removeEventListener(this.touchName.end,this._touchEndHander,false);
+        this.target.removeEventListener('touchcancel',this._touchEndHander,false);
         
-        console.log('-----------------range',this.range);
         this.endY = this.range || 0; 
         // 随流效果
         this._endTime = new Date().getTime();
         let rangeTime = (this._endTime - this._startTime)/1000;//单位: 秒
-        console.log('rangeTime',rangeTime);
         if(this.endY!==0){
 
-            let space = Math.floor(Math.abs(this.endY)/(rangeTime*10));
-            console.log('space',space,this.endY);
+            let space = Math.floor(Math.abs(this.endY)/(rangeTime*5));
             this.endY = this.endY>0? this.endY+space: this.endY-space;
 
         }
-        cb(e, this.endY);
+        
+        this._endCb(e, this.endY);
     }
 }

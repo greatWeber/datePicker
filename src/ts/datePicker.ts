@@ -1,3 +1,6 @@
+// import "babel-polyfill";
+import polyfill from  './polyfill'; 
+polyfill();  
 import Utils from './utils';
 import BasePicker from './basePicker';
 
@@ -6,9 +9,9 @@ interface globalOpt {
     onchange?: Function,
     success?: Function
 }
-
+ 
 // picker参数接口
-interface pickers {
+interface pickers { 
     startYear?: string;
     endYear?: string;
     defaultDate?: string;
@@ -66,14 +69,14 @@ class DatePicker extends Utils{
 
     set pickerList(val: any){
         this._pickerList = val;
-    }
+    } 
 
 
     // 辅助变量
     private _maxKeyCount :number = 10; //可创建选择器的最大数量
 
     public globalOptions(opt?: globalOpt){
-        this.opt = Object.assign({
+        this.opt = this.assign({
             maxKeyCount: this._maxKeyCount,
             onchange: ()=>{},
             success: ()=>{}
@@ -85,7 +88,7 @@ class DatePicker extends Utils{
     }
 
     public picker(params?: pickers){
-        this.params = Object.assign({ 
+        this.params = this.assign({ 
             startYear: '1990',
             endYear: '2030',
             defaultDate: this.getToday('-'),
