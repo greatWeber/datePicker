@@ -67,6 +67,10 @@ export default class Utils {
         }
     }
 
+    public assign(){
+        
+    }
+
     // 自定义提示
     public Tip(tipName: string, msg: string, timeout?: number){
         let $tip = this.select(tipName);

@@ -1,14 +1,17 @@
-import DatePicker from './datePicker';
+import datePicker from './datePicker';
 
-const datePicker1 = new DatePicker();
-
-let picker1 = datePicker1.picker({
+datePicker.globalOptions({
+    success: (data)=>{
+        console.log(data);
+    }
+})
+let picker1 = datePicker.picker({
     onchange:(data)=>{
         console.log('onchange',data);
     }
 });
 
-let picker2 = datePicker1.picker({
+let picker2 = datePicker.picker({
     onchange:(data)=>{
         console.log('onchange',data);
     }
@@ -21,5 +24,5 @@ document.querySelectorAll('.picker')[0].addEventListener('click',()=>{
 
 document.querySelectorAll('.picker')[1].addEventListener('click',()=>{
 
-    picker2.show();
+    picker2.show(); 
 })

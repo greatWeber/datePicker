@@ -8,7 +8,9 @@ export default class Touchs {
 
     // 辅助类参数
     private bool: boolean = true;
-    private limit: number = 0;
+    private limit: number = 0; //限流
+    private _startTime: number = 0;
+    private _endTime: number =0;
 
     constructor(target: any){
         console.log('init')
@@ -62,6 +64,7 @@ export default class Touchs {
 
     private touchStartHander(e: any, cb: Function){
         this.startY = e.touches[0].pageY;
+        this._startTime = new Date().getTime();
         console.log(this.startY);
         cb(e);
     }
@@ -110,7 +113,19 @@ export default class Touchs {
         this.target.removeEventListener('touchend',this.touchEndHander,false);
         this.target.removeEventListener('touchcancel',this.touchEndHander,false);
         
-        this.endY = this.range; 
+        console.log('-----------------range',this.range);
+        this.endY = this.range || 0; 
+        // 随流效果
+        this._endTime = new Date().getTime();
+        let rangeTime = (this._endTime - this._startTime)/1000;//单位: 秒
+        console.log('rangeTime',rangeTime);
+        if(this.endY!==0){
+
+            let space = Math.floor(Math.abs(this.endY)/(rangeTime*10));
+            console.log('space',space,this.endY);
+            this.endY = this.endY>0? this.endY+space: this.endY-space;
+
+        }
         cb(e, this.endY);
     }
 }

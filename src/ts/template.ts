@@ -16,8 +16,8 @@ export const range = `
 export const picker = `
 <div class="picker-wrapper">
     <div class="picker-head flex space-between">
-        <span class="cancel">取消</span>
-        <span class="sure">确定</span>
+        <span class="cancel picker-btn__cancel">取消</span>
+        <span class="sure picker-btn__sure">确定</span>
     </div>
     <div class="picker-body">
         ${range}

@@ -15,18 +15,17 @@ var utils_1 = require("./utils");
 var temp = require("./template");
 var touch_1 = require("./touch");
 
-var DatePicker = function (_utils_1$default) {
-    _inherits(DatePicker, _utils_1$default);
+var BasePicker = function (_utils_1$default) {
+    _inherits(BasePicker, _utils_1$default);
 
-    function DatePicker(options) {
-        _classCallCheck(this, DatePicker);
+    function BasePicker(options) {
+        _classCallCheck(this, BasePicker);
 
-        var _this2 = _possibleConstructorReturn(this, (DatePicker.__proto__ || Object.getPrototypeOf(DatePicker)).call(this));
+        var _this2 = _possibleConstructorReturn(this, (BasePicker.__proto__ || Object.getPrototypeOf(BasePicker)).call(this));
 
         _this2._opt = {}; //全局配置
         _this2._params = {}; //初始化配置
         _this2._key = 1; //唯一key
-        _this2._keyList = []; //key列表
         _this2._monthStr = ''; //月份字符串
         _this2._dayStr = ''; //天数字符串
         _this2._currentPicker = null; //保存当前显示的选择器
@@ -35,19 +34,16 @@ var DatePicker = function (_utils_1$default) {
         _this2._mask = null; //保存唯一的遮罩
         // 辅助类变量
         _this2._height = 0; //选择器格子的高度
-        _this2._maxKeyCount = 20; //可创建选择器的最大数量
         _this2.opt = Object.assign({
-            maxKeyCount: _this2._maxKeyCount,
             onchange: function onchange() {},
             success: function success() {}
         }, options);
-        _this2.opt.maxKeyCount = _this2.opt.maxKeyCount > 0 && _this2.opt.maxKeyCount <= 20 ? _this2.opt.maxKeyCount : _this2._maxKeyCount;
         _this2.monthStr = _this2.createMonthStr();
         _this2.dayStr = _this2.createDayStr();
         return _this2;
     }
 
-    _createClass(DatePicker, [{
+    _createClass(BasePicker, [{
         key: "picker",
         value: function picker(params) {
             this.params = Object.assign({
@@ -60,26 +56,7 @@ var DatePicker = function (_utils_1$default) {
                 success: function success() {},
                 type: 'range'
             }, params);
-            // 保存key值，如果列表的key值过多，禁止创建
-            if (!this.keyList.includes(this.params.key)) {
-                this.keyList.push(this.params.key);
-                this.key += 1;
-                console.log('key', this.key);
-            }
-            if (this.keyList.length > this.opt.maxKeyCount) {
-                console.error("\n            Error:\u68C0\u6D4B\u5230\u9875\u9762\u4E0A\u521B\u5EFA\u7684\u9009\u62E9\u5668\u8FC7\u591A!\n            \u8BF7\u68C0\u67E5\u4EE3\u7801\u662F\u5426\u6709\u95EE\u9898\n            \u8BF7\u4E0D\u8981\u5728\u5FAA\u73AF\u6216\u8005\u4E8B\u4EF6\u4E2D\u91CD\u590D\u8C03\u7528.picker()\u65B9\u6CD5\n            \u82E5\u975E\u8981\u5982\u6B64\u8C03\u7528\uFF0C\u4E00\u5B9A\u8981\u52A0\u4E0Akey\u5C5E\u6027\n            \u5EFA\u8BAE\u5728\u5916\u9762\u8C03\u7528.picker()\u65B9\u6CD5\uFF0C\u5728\u91CC\u9762\u8C03\u7528.show()\u65B9\u6CD5\u663E\u793A\n            ");
-                return;
-            }
             this.render();
-            var _this = this;
-            // 返回一个对象,方便调用
-            return {
-                key: _this.params.key,
-                show: function show() {
-                    _this.show(_this.params.key);
-                },
-                hide: _this.hide.bind(_this)
-            };
         }
     }, {
         key: "render",
@@ -108,7 +85,6 @@ var DatePicker = function (_utils_1$default) {
         key: "createPicker",
         value: function createPicker() {
             // 创建选择器
-            this.currentPicker = null; //每次渲染前都把之前的选择器释放
             var pickerName = "picker-key-" + this.params.key;
             var $picker = this.select("." + pickerName);
             var $pickerWrapper = this.select("." + pickerName + " .picker-wrapper");
@@ -161,7 +137,7 @@ var DatePicker = function (_utils_1$default) {
             }
             var html = '';
             years.forEach(function (item, i) {
-                html += "<p class=\"date-unit\" data-month=\"" + item + "\">" + item + "\u5E74</p>";
+                html += "<p class=\"date-unit\" data-year=\"" + item + "\">" + item + "\u5E74</p>";
             });
             // console.log('year',html);
             return html;
@@ -193,7 +169,7 @@ var DatePicker = function (_utils_1$default) {
             var html = '';
             days.forEach(function (item, i) {
                 var day = item >= 10 ? item : '0' + item;
-                html += "<p class=\"date-unit\" data-month=\"" + item + "\">" + day + "\u65E5</p>";
+                html += "<p class=\"date-unit\" data-day=\"" + item + "\">" + day + "\u65E5</p>";
             });
             // console.log('day',html);
             return html;
@@ -219,7 +195,6 @@ var DatePicker = function (_utils_1$default) {
             });
             // month
             var monthIndex = this.currentToIndex(parseInt(dateArray[1]) - 1);
-            console.log('monthIndex', this._height * monthIndex);
             this.setCss($dateUtils[1], {
                 'transform': "translateY(" + monthIndex * this._height + "px)"
             });
@@ -250,7 +225,9 @@ var DatePicker = function (_utils_1$default) {
                 // 注意：EndY的值不应该为0，而是调用默认视图函数后的距离
                 var EndY = defaultInfo.heightArray[i];
                 var touchs = new touch_1.default(dateGroup);
-                touchs.touchStart(_this.touchStart);
+                touchs.touchStart(function (e, range) {
+                    _this.touchStart(e, $dateUtils);
+                });
                 touchs.touchMove(function (e, range) {
                     _this.touchMove(e, range, EndY, $dateUtils);
                 });
@@ -263,8 +240,11 @@ var DatePicker = function (_utils_1$default) {
         }
     }, {
         key: "touchStart",
-        value: function touchStart() {
+        value: function touchStart(e, target) {
             console.log('start');
+            this.setCss(target, {
+                'transition': '.3s all linear'
+            });
         }
     }, {
         key: "touchMove",
@@ -281,7 +261,7 @@ var DatePicker = function (_utils_1$default) {
             var max = EndY > 0 ? min + 1 : min - 1;
             var middle = (max + min) / 2 * this._height;
             var current = 0;
-            var currentValue = dateArray;
+            this.currentValue = dateArray;
             // console.log('min',min);
             // console.log('middle',middle);
             // console.log('EndY', EndY);
@@ -307,6 +287,7 @@ var DatePicker = function (_utils_1$default) {
                 case 2:
                     //日
                     // Todo
+                    counts = this.getDay();
                     break;
                 default:
                     break;
@@ -326,18 +307,49 @@ var DatePicker = function (_utils_1$default) {
             var arrayIndex = this.currentToIndex(current); //把格子索引转成数组索引
             if (Index == 0) {
                 // 只有年需要从数组中读取值
-                currentValue[Index] = this.currentPicker.years[arrayIndex];
+                this.currentValue[Index] = this.currentPicker.years[arrayIndex];
             } else {
-                currentValue[Index] = arrayIndex + 1 >= 10 ? arrayIndex + 1 : '0' + (arrayIndex + 1);
+                this.currentValue[Index] = arrayIndex + 1 >= 10 ? arrayIndex + 1 : '0' + (arrayIndex + 1);
             }
             this.setCss(target, {
+                'transition': '.3s all linear',
                 'transform': "translateY(" + EndY + "px)"
             });
             // 调用onchange回调
-            this.opt.onchange(currentValue);
-            this.params.onchange(currentValue);
-            this.$emit("onchange_" + this.params.key, currentValue);
+            this.opt.onchange(this.currentValue);
+            this.params.onchange(this.currentValue);
+            this.$emit("onchange_" + this.params.key, this.currentValue, Index);
             return EndY;
+        }
+    }, {
+        key: "getDay",
+        value: function getDay() {
+            // 获取当月的天数
+            var _this = this;
+            var days = new Date(this.currentValue[0], this.currentValue[1], 0).getDate();
+            console.log('days', days);
+            var $untis = this.selectAll('[data-day]', this.currentPicker);
+            var fade = function fade(index, opacity) {
+                for (var i = 30; i >= index; i--) {
+                    _this.setCss($untis[i], {
+                        'opacity': opacity
+                    });
+                }
+            };
+            switch (days) {
+                case 30:
+                    fade(30, '0');
+                    break;
+                case 28:
+                    fade(28, '0');
+                    break;
+                case 31:
+                    fade(28, '1');
+                    break;
+                default:
+                    break;
+            }
+            return days;
         }
     }, {
         key: "currentToIndex",
@@ -367,29 +379,21 @@ var DatePicker = function (_utils_1$default) {
             });
             this.currentPicker.classList.remove('__picker-type-show');
             this.currentPicker.classList.add('__picker-type-hide');
-            this.currentPicker = null;
         }
     }, {
         key: "show",
-        value: function show(key) {
-            if (!key) {
-                var tip = "\n            show\u65B9\u6CD5\u4E00\u5B9A\u8981\u4F20\u5165key\u503C\n            \u8BE5\u503C\u4E0Epicker\u65B9\u6CD5\u7684key\u53C2\u6570\u4E00\u81F4\n            ";
-                console.error(tip);
-                this.errorTip(tip);
-                return;
-            }
+        value: function show() {
             this.setCss(this.mask, {
                 'opacity': '1',
                 'display': 'block'
             });
-            var $picker = this.select(".picker-key-" + key);
+            var $picker = this.currentPicker;
             if (!$picker) {
-                var _tip = "\n            \u6CA1\u6709\u8BE5key(" + key + ")\u503C\u7684\u9009\u62E9\u5668\n            \u8BF7\u68C0\u67E5\u662F\u5426\u5199\u9519!\n            ";
-                console.error(_tip);
-                this.errorTip(_tip);
+                var tip = "\n            \u6CA1\u6709\u8BE5key(" + this.params.key + ")\u503C\u7684\u9009\u62E9\u5668\n            \u8BF7\u68C0\u67E5\u662F\u5426\u5199\u9519!\n            ";
+                console.error(tip);
+                this.errorTip(tip);
                 return;
             }
-            this.currentPicker = $picker;
             var $pickerWrapper = this.select(".picker-wrapper", $picker);
             this.setCss($pickerWrapper, {
                 'transform': 'translateY(0px)'
@@ -400,6 +404,8 @@ var DatePicker = function (_utils_1$default) {
     }, {
         key: "rangeOperation",
         value: function rangeOperation() {
+            var _this3 = this;
+
             // 时间区间选择器的逻辑事件
             var $picker = this.currentPicker;
             var $rangeChilds = this.selectAll('.range-child', $picker);
@@ -417,9 +423,9 @@ var DatePicker = function (_utils_1$default) {
                     currentIndex = i;
                 });
             });
+            // 订阅事件，监听选择器的变化，修改开始和结束的时间显示
             var startTime = '',
                 endTime = '';
-            console.log('onchange', "onchange_" + this.params.key);
             this.$on("onchange_" + this.params.key, function (data) {
                 var currentDate = data.join(_this.params.outFormat);
                 $rangeChilds[currentIndex].innerHTML = currentDate;
@@ -430,7 +436,39 @@ var DatePicker = function (_utils_1$default) {
                     endTime = currentDate;
                 }
             });
-            // 
+            // 确定按钮
+            var $sure = this.select('.picker-btn__sure', this.currentPicker);
+            if (!$sure) {
+                var tip = "\n            \u6CA1\u627E\u5230\u786E\u5B9A\u6309\u94AE,\n            \u8BF7\u786E\u4FDDclass='.picker-btn__sure'\u7684\u6309\u94AE\u6CA1\u6709\u88AB\u53BB\u6389\n            ";
+                console.error(tip);
+                this.errorTip(tip);
+                return;
+            }
+            $sure.addEventListener('click', function (e) {
+                if (new Date(endTime).getTime() < new Date(startTime).getTime()) {
+                    var _tip = "\u5F00\u59CB\u65E5\u671F\u4E0D\u80FD\u5927\u4E8E\u7ED3\u675F\u65E5\u671F";
+                    _this3.errorTip(_tip);
+                    return;
+                }
+                var result = {
+                    startTime: startTime,
+                    endTime: endTime
+                };
+                _this.opt.success(result);
+                _this.params.success(result);
+                _this.hide();
+            });
+            // 取消按钮
+            var $cancel = this.select('.picker-btn__cancel', this.currentPicker);
+            if (!$cancel) {
+                var _tip2 = "\n            \u6CA1\u627E\u5230\u53D6\u6D88\u6309\u94AE,\n            \u8BF7\u786E\u4FDDclass='.picker-btn__cancel'\u7684\u6309\u94AE\u6CA1\u6709\u88AB\u53BB\u6389\n            ";
+                console.error(_tip2);
+                this.errorTip(_tip2);
+                return;
+            }
+            $cancel.addEventListener('click', function (e) {
+                _this.hide();
+            });
         }
     }, {
         key: "opt",
@@ -455,14 +493,6 @@ var DatePicker = function (_utils_1$default) {
         },
         set: function set(val) {
             this._key = val;
-        }
-    }, {
-        key: "keyList",
-        get: function get() {
-            return this._keyList;
-        },
-        set: function set(val) {
-            this._keyList = val;
         }
     }, {
         key: "monthStr",
@@ -514,23 +544,161 @@ var DatePicker = function (_utils_1$default) {
         }
     }]);
 
+    return BasePicker;
+}(utils_1.default);
+
+exports.default = BasePicker;
+
+},{"./template":4,"./touch":5,"./utils":6}],2:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = require("./utils");
+var basePicker_1 = require("./basePicker");
+
+var DatePicker = function (_utils_1$default) {
+    _inherits(DatePicker, _utils_1$default);
+
+    function DatePicker() {
+        _classCallCheck(this, DatePicker);
+
+        var _this = _possibleConstructorReturn(this, (DatePicker.__proto__ || Object.getPrototypeOf(DatePicker)).call(this));
+
+        _this._opt = {};
+        _this._params = {}; //初始化配置
+        _this._key = 1; //唯一key
+        _this._keyList = []; //key列表
+        _this._pickerList = []; //保存创建的picker对象
+        // 辅助变量
+        _this._maxKeyCount = 10; //可创建选择器的最大数量
+        return _this;
+    }
+
+    _createClass(DatePicker, [{
+        key: "globalOptions",
+        value: function globalOptions(opt) {
+            this.opt = Object.assign({
+                maxKeyCount: this._maxKeyCount,
+                onchange: function onchange() {},
+                success: function success() {}
+            }, opt);
+            this.opt.maxKeyCount = this.opt.maxKeyCount > 0 && this.opt.maxKeyCount <= 20 ? this.opt.maxKeyCount : this._maxKeyCount;
+        }
+    }, {
+        key: "picker",
+        value: function picker(params) {
+            var _this2 = this;
+
+            this.params = Object.assign({
+                startYear: '1990',
+                endYear: '2030',
+                defaultDate: this.getToday('-'),
+                key: this.key,
+                outFormat: '-',
+                onchange: function onchange() {},
+                success: function success() {},
+                type: 'range'
+            }, params);
+            // 保存key值，如果列表的key值过多，禁止创建
+            if (!this.keyList.includes(this.params.key)) {
+                this.keyList.push(this.params.key);
+                this.key += 1;
+                var _picker = new basePicker_1.default(this.opt);
+                _picker.picker(this.params); //初始化
+                this.pickerList.push({
+                    key: this.params.key,
+                    picker: _picker
+                });
+            }
+            if (this.keyList.length > this.opt.maxKeyCount) {
+                var tip = "\n            Error:\u68C0\u6D4B\u5230\u9875\u9762\u4E0A\u521B\u5EFA\u7684\u9009\u62E9\u5668\u8FC7\u591A!\n            \u8BF7\u68C0\u67E5\u4EE3\u7801\u662F\u5426\u6709\u95EE\u9898\n            \u8BF7\u4E0D\u8981\u5728\u5FAA\u73AF\u6216\u8005\u4E8B\u4EF6\u4E2D\u91CD\u590D\u8C03\u7528.picker()\u65B9\u6CD5\n            \u82E5\u975E\u8981\u5982\u6B64\u8C03\u7528\uFF0C\u4E00\u5B9A\u8981\u52A0\u4E0Akey\u5C5E\u6027\n            \u5EFA\u8BAE\u5728\u5916\u9762\u8C03\u7528.picker()\u65B9\u6CD5\uFF0C\u5728\u91CC\u9762\u8C03\u7528.show()\u65B9\u6CD5\u663E\u793A\n            ";
+                console.error(tip);
+                this.errorTip(tip);
+                return;
+            }
+            var picker = this.pickerList.find(function (item) {
+                return item.key == _this2.params.key;
+            });
+            if (!picker) {
+                var _tip = "\n            Error:\u627E\u4E0D\u5230\u8BE5key(" + this.params.key + ")\u7684\u9009\u62E9\u5668,\n            \u8BF7\u68C0\u67E5\u4EE3\u7801\u662F\u5426\u6709\u95EE\u9898\n            ";
+                console.error(_tip);
+                this.errorTip(_tip);
+                return;
+            }
+            return picker.picker;
+        }
+    }, {
+        key: "opt",
+        get: function get() {
+            return this._opt;
+        },
+        set: function set(val) {
+            this._opt = val;
+        }
+    }, {
+        key: "params",
+        get: function get() {
+            return this._params;
+        },
+        set: function set(val) {
+            this._params = val;
+        }
+    }, {
+        key: "key",
+        get: function get() {
+            return this._key;
+        },
+        set: function set(val) {
+            this._key = val;
+        }
+    }, {
+        key: "keyList",
+        get: function get() {
+            return this._keyList;
+        },
+        set: function set(val) {
+            this._keyList = val;
+        }
+    }, {
+        key: "pickerList",
+        get: function get() {
+            return this._pickerList;
+        },
+        set: function set(val) {
+            this._pickerList = val;
+        }
+    }]);
+
     return DatePicker;
 }(utils_1.default);
 
-exports.default = DatePicker;
+var datePicker = new DatePicker();
+exports.default = datePicker;
 
-},{"./template":3,"./touch":4,"./utils":5}],2:[function(require,module,exports){
+},{"./basePicker":1,"./utils":6}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var datePicker_1 = require("./datePicker");
-var datePicker1 = new datePicker_1.default();
-var picker1 = datePicker1.picker({
+datePicker_1.default.globalOptions({
+    success: function success(data) {
+        console.log(data);
+    }
+});
+var picker1 = datePicker_1.default.picker({
     onchange: function onchange(data) {
         console.log('onchange', data);
     }
 });
-var picker2 = datePicker1.picker({
+var picker2 = datePicker_1.default.picker({
     onchange: function onchange(data) {
         console.log('onchange', data);
     }
@@ -542,16 +710,16 @@ document.querySelectorAll('.picker')[1].addEventListener('click', function () {
     picker2.show();
 });
 
-},{"./datePicker":1}],3:[function(require,module,exports){
+},{"./datePicker":2}],4:[function(require,module,exports){
 "use strict";
 // 模板字符串
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mask = "\n<div class=\"picker-mask\"></div>\n";
 exports.range = "\n<div class=\"picker-range\">\n    <p class=\"range-child start-time range-act\">\u5F00\u59CB\u65E5\u671F</p>\n    <span>\u81F3</span>\n    <p class=\"range-child end-time\">\u7ED3\u675F\u65E5\u671F</p>\n</div>\n";
-exports.picker = "\n<div class=\"picker-wrapper\">\n    <div class=\"picker-head flex space-between\">\n        <span class=\"cancel\">\u53D6\u6D88</span>\n        <span class=\"sure\">\u786E\u5B9A</span>\n    </div>\n    <div class=\"picker-body\">\n        " + exports.range + "\n\n        <div class=\"date-content flex\">\n\n            <div class=\"date-group flex-item\">\n                    <div class=\"content-mask mask-top\"></div>\n                    <div class=\"content-mask mask-bottom\"></div>\n                    <div class=\"date-item \">\n                        $1\n                    </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $2\n                </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $3\n                </div>\n            </div>\n        </div>\n\n    </div>\n</div>\n";
+exports.picker = "\n<div class=\"picker-wrapper\">\n    <div class=\"picker-head flex space-between\">\n        <span class=\"cancel picker-btn__cancel\">\u53D6\u6D88</span>\n        <span class=\"sure picker-btn__sure\">\u786E\u5B9A</span>\n    </div>\n    <div class=\"picker-body\">\n        " + exports.range + "\n\n        <div class=\"date-content flex\">\n\n            <div class=\"date-group flex-item\">\n                    <div class=\"content-mask mask-top\"></div>\n                    <div class=\"content-mask mask-bottom\"></div>\n                    <div class=\"date-item \">\n                        $1\n                    </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $2\n                </div>\n            </div>\n            <div class=\"date-group flex-item\">\n                <div class=\"content-mask mask-top\"></div>\n                <div class=\"content-mask mask-bottom\"></div>\n                <div class=\"date-item\">\n                    $3\n                </div>\n            </div>\n        </div>\n\n    </div>\n</div>\n";
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -566,7 +734,9 @@ var Touchs = function () {
 
         // 辅助类参数
         this.bool = true;
-        this.limit = 0;
+        this.limit = 0; //限流
+        this._startTime = 0;
+        this._endTime = 0;
         console.log('init');
         this._target = target;
     }
@@ -586,6 +756,7 @@ var Touchs = function () {
         key: "touchStartHander",
         value: function touchStartHander(e, cb) {
             this.startY = e.touches[0].pageY;
+            this._startTime = new Date().getTime();
             console.log(this.startY);
             cb(e);
         }
@@ -634,7 +805,17 @@ var Touchs = function () {
             this.target.removeEventListener('touchmove', this.touchMoveHander, false);
             this.target.removeEventListener('touchend', this.touchEndHander, false);
             this.target.removeEventListener('touchcancel', this.touchEndHander, false);
-            this.endY = this.range;
+            console.log('-----------------range', this.range);
+            this.endY = this.range || 0;
+            // 随流效果
+            this._endTime = new Date().getTime();
+            var rangeTime = (this._endTime - this._startTime) / 1000; //单位: 秒
+            console.log('rangeTime', rangeTime);
+            if (this.endY !== 0) {
+                var space = Math.floor(Math.abs(this.endY) / (rangeTime * 10));
+                console.log('space', space, this.endY);
+                this.endY = this.endY > 0 ? this.endY + space : this.endY - space;
+            }
             cb(e, this.endY);
         }
     }, {
@@ -678,7 +859,7 @@ var Touchs = function () {
 
 exports.default = Touchs;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -771,6 +952,9 @@ var Utils = function () {
                 });
             }
         }
+    }, {
+        key: "assign",
+        value: function assign() {}
         // 自定义提示
 
     }, {
@@ -816,6 +1000,6 @@ var Utils = function () {
 
 exports.default = Utils;
 
-},{}]},{},[2])
+},{}]},{},[3])
 
 //# sourceMappingURL=datePicker.js.map
