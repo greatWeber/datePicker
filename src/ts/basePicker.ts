@@ -18,21 +18,23 @@ interface pickers {
 
 }
 
-export default class BasePicker extends Utils {
+export default abstract class BasePicker extends Utils {
     private _opt: object = {}; //全局配置
     private _params: object = {}; //初始化配置
     private _key: number = 1; //唯一key
 
-    private _monthStr: string = ''; //月份字符串
-    private _dayStr: string = ''; //天数字符串
+    protected monthStr: string = ''; //月份字符串
+    protected dayStr: string = ''; //天数字符串
 
-    private _currentPicker: any = null; //保存当前显示的选择器
+    protected currentPicker: any = null; //保存当前显示的选择器
 
-    private _currentIndexs: Array<number> = [];//保存当前选择的格子索引
+    protected currentIndexs: Array<number> = [];//保存当前选择的格子索引
 
-    private _currentValue: Array<number|string> = []; //保存当前选择的值
+    protected currentValue: Array<any> = []; //保存当前选择的值 
 
-    private _mask: any = null; //保存唯一的遮罩
+    protected mask: any = null; //保存唯一的遮罩
+
+    protected defaultInfo: any = {}; //
 
     get opt(): any{
         return this._opt;
@@ -58,56 +60,10 @@ export default class BasePicker extends Utils {
         this._key = val;
     }
 
-    get monthStr(): string{
-        return this._monthStr;
-    }
-
-    set monthStr(val: string){
-        this._monthStr = val;
-    }
-
-    get dayStr(): string{
-        return this._dayStr;
-    }
-
-    set dayStr(val: string){
-        this._dayStr = val;
-    }
-
-    get currentPicker(): any{
-        return this._currentPicker;
-    }
-
-    set currentPicker(val: any){
-        this._currentPicker = val;
-    }
-
-    get currentIndexs(): any{
-        return this._currentIndexs;
-    }
-
-    set currentIndexs(val: any){
-        this._currentIndexs = val;
-    }
-
-    get currentValue(): any{
-        return this._currentValue;
-    }
-
-    set currentValue(val: any){
-        this._currentValue = val;
-    }
-
-    get mask(): any{
-        return this._mask;
-    }
-
-    set mask(val: any){
-        this._mask = val;
-    }
+    
 
     // 辅助类变量
-    private _height :number = 0; //选择器格子的高度
+    protected _height :number = 0; //选择器格子的高度
     
 
     constructor(options?: object){  
@@ -116,17 +72,13 @@ export default class BasePicker extends Utils {
             onchange: ()=>{},
             success: ()=>{}
         },options);
-
-
-        this.monthStr = this.createMonthStr();
-        this.dayStr = this.createDayStr();
+        
     }
 
-    
-
-    
-
     public picker(params?: pickers){
+        /**
+         * 初始化方法，不建议在循环中或者事件中重复调用
+         */
         this.params = this.assign({ 
             startYear: '1990',
             endYear: '2030',
@@ -142,6 +94,8 @@ export default class BasePicker extends Utils {
         this.render();
 
     }
+
+    // abstract render() :void;
 
     public render(){ 
         // 渲染函数，一般要在子类重写
@@ -177,9 +131,10 @@ export default class BasePicker extends Utils {
         let _this = this;
         
         if(!$picker){
-            
+            this.monthStr = this.createMonthStr();
+            this.dayStr = this.createDayStr();
             let pickerHtml = this.renderHtml();
-            // console.log('picker',pickerHtml);
+
             $picker = this.createElm(document.body,'div',pickerName);
             $picker.innerHTML = pickerHtml;
             $pickerWrapper = this.select(`.${pickerName} .picker-wrapper`);
@@ -192,9 +147,9 @@ export default class BasePicker extends Utils {
             }
             this.currentPicker = $picker || {}; //保存当前的选择器
             this.currentPicker.years = this.getYearArray();
-            let defaultInfo = this.setDefaultView(); //设置默认日期的视图
-            this.bindEvents(defaultInfo);
-            this.rangeOperation();
+            this.setDefaultView(this.params.defaultDate); //设置默认日期的视图
+            this.bindEvents();
+            this.pickerOperation();
         }
 
         // 添加显示状态
@@ -203,13 +158,9 @@ export default class BasePicker extends Utils {
         this.currentPicker.years = this.getYearArray();
     }
 
-    public renderHtml(): string{
-        // 获取html样式的函数，注意，该函数一般要在子类重写
-        let yearStr = this.createYearStr();
-        return temp.picker.replace('$1',yearStr)
-                            .replace('$2',this.monthStr)
-                            .replace('$3',this.dayStr);
-    }
+    abstract renderHtml(): string
+
+    
 
     public getYearArray(): Array<number>{
         let years = [];
@@ -267,12 +218,12 @@ export default class BasePicker extends Utils {
         return html;
     }
 
-    public setDefaultView(){
-        if(!this.params.defaultDate){
+    public setDefaultView(defaultDate: string){
+        if(!defaultDate){
             console.error('Error: 默认日期(defaultDate)不能为空');
             return;
         }
-        let dateArray = this.params.defaultDate.split('-');
+        let dateArray = defaultDate.split('-');
         if(!dateArray || dateArray.length<3){
             console.error('Error:默认日期(defaultDate)的格式有误,默认格式:2019-01-01 or 2019-1-1');
             return;
@@ -297,14 +248,14 @@ export default class BasePicker extends Utils {
         this.setCss($dateUtils[2],{
             'transform':`translateY(${dayIndex*this._height}px)`
         });
-        return{
+        this.defaultInfo = {
             dateArray: dateArray,
             heightArray: [yearIndex*this._height,monthIndex*this._height,dayIndex*this._height]
         } ;
 
     }
 
-    public bindEvents(defaultInfo: any){
+    public bindEvents(){
         if(!this.currentPicker){
             console.error('Error: 选择器还没有渲染');
             return;
@@ -321,7 +272,7 @@ export default class BasePicker extends Utils {
                 'transition':'0.1s all linear' 
             });   
             // 注意：EndY的值不应该为0，而是调用默认视图函数后的距离
-            let EndY: number = defaultInfo.heightArray[i];
+            let EndY: number = this.defaultInfo.heightArray[i];
 
             let touchs = new Touchs(dateGroup);
             touchs.init({
@@ -332,7 +283,7 @@ export default class BasePicker extends Utils {
                     _this.touchMove(e,range,EndY,$dateUtils); 
                 },
                 endCb: (e:any, endY: number)=>{
-                    EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
+                    EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i);
                     console.log('touchEnd',EndY) 
                 }
             })
@@ -365,13 +316,13 @@ export default class BasePicker extends Utils {
         });
     }
 
-    private touchEnd(e: any, endY: number, EndY: number, target: any, Index: number, dateArray: Array<any>){
+    private touchEnd(e: any, endY: number, EndY: number, target: any, Index: number){
         EndY = EndY+endY;
         let min = EndY >0?Math.floor(EndY / this._height): Math.ceil(EndY / this._height);
         let max = EndY >0? min+1: min-1;
         let middle = (max+min)/2*this._height;
         let current = 0;
-        this.currentValue = dateArray;
+        this.currentValue = this.defaultInfo.dateArray;
         // console.log('min',min);
         // console.log('middle',middle);
         // console.log('EndY', EndY);
@@ -427,7 +378,9 @@ export default class BasePicker extends Utils {
         // 调用onchange回调
         this.opt.onchange(this.currentValue);
         this.params.onchange(this.currentValue);
-        this.$emit(`onchange_${this.params.key}`,this.currentValue, Index);
+        let currentValue = this.currentValue.join(this.params.outFormat);
+
+        this.$emit(`onchange_${this.params.key}`,currentValue);
         return EndY;
     }
 
@@ -518,84 +471,8 @@ export default class BasePicker extends Utils {
 
     }
 
-    public rangeOperation(){
-        // 时间区间选择器的逻辑事件
-        let $picker = this.currentPicker;
-        let $rangeChilds = this.selectAll('.range-child',$picker);
-        let currentIndex = 0;
-        let _this = this;
-        Array.prototype.slice.call($rangeChilds).forEach((rangeChild,i)=>{
-            console.log('rangeChild',rangeChild);
-            rangeChild.addEventListener('click',(e)=>{
-                console.log(e)
-                if(e.target.classList.contains('range-act'))return;
-                Array.prototype.slice.call($rangeChilds).forEach(item => {
+    abstract reView(data: any) :void;
 
-                    item.classList.remove('range-act')
-                });
+    abstract pickerOperation(): void;
 
-                e.target.classList.add('range-act');
-                currentIndex = i;
-            })
-        });
-
-        // 订阅事件，监听选择器的变化，修改开始和结束的时间显示
-        let startTime ='', endTime = '';
-        this.$on(`onchange_${this.params.key}`,(data)=>{
-            let currentDate = data.join(_this.params.outFormat);
-            $rangeChilds[currentIndex].innerHTML = currentDate;
-            if(currentIndex==0){
-                // 开始日期
-                startTime = currentDate; 
-            }else{
-                endTime = currentDate;
-            }
-
-        });
-
-        // 确定按钮
-        let $sure = this.select('.picker-btn__sure',this.currentPicker);
-        if(!$sure){
-            let tip = `
-            没找到确定按钮,
-            请确保class='.picker-btn__sure'的按钮没有被去掉
-            `;
-            console.error(tip);
-            this.errorTip(tip);
-            return;
-        }
-        $sure.addEventListener('click',(e)=>{
-            if(new Date(endTime).getTime()<new Date(startTime).getTime()){
-                let tip = `开始日期不能大于结束日期`;
-                this.errorTip(tip);
-                return;
-            }
-            let result = {
-                startTime,
-                endTime
-            }
-            _this.opt.success(result);
-            _this.params.success(result);
-
-            _this.hide();
-
-        });
-
-        // 取消按钮
-        let $cancel = this.select('.picker-btn__cancel',this.currentPicker);
-        if(!$cancel){
-            let tip = `
-            没找到取消按钮,
-            请确保class='.picker-btn__cancel'的按钮没有被去掉
-            `;
-            console.error(tip);
-            this.errorTip(tip);
-            return;
-        }
-
-        $cancel.addEventListener('click',(e)=>{
-            _this.hide();
-        })
-
-    }
 }

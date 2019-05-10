@@ -3,6 +3,8 @@ import polyfill from  './polyfill';
 polyfill();  
 import Utils from './utils';
 import BasePicker from './basePicker';
+import RangePicker from './rangePicker';
+
 
 interface globalOpt {
     maxKeyCount?: number,
@@ -105,7 +107,7 @@ class DatePicker extends Utils{
             this.keyList.push(this.params.key);
             this.key+=1;
            
-            let picker = new BasePicker(this.opt);
+            let picker = this.render(); 
             picker.picker(this.params);//初始化
             this.pickerList.push({
                 key: this.params.key,
@@ -140,6 +142,19 @@ class DatePicker extends Utils{
 
         return picker.picker; 
 
+    }
+
+    private render(){
+        let picker = null;
+        switch (this.params.type) {
+            case 'range':
+                picker = new RangePicker(this.opt);
+                break;
+        
+            default:
+                break;
+        }
+        return picker;
     }
 
 }

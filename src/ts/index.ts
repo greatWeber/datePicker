@@ -8,6 +8,9 @@ datePicker.globalOptions({
 let picker1 = datePicker.picker({
     onchange:(data)=>{
         console.log('onchange',data);
+    },
+    success: (data)=>{
+        picker1.reView('2019-01-01');
     }
 });
 console.log('-----------------------')
