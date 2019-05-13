@@ -35,6 +35,7 @@
     // body
     .picker-body {
         padding: 60*@rem;
+        position: relative;
     }
 
     .picker-range {
@@ -54,6 +55,52 @@
             color: @baseColor;
             border-color: @baseColor;
         }
+    }
+
+    // 时分秒样式
+    .date-content-minute {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 50*@rem;
+        left: 0;
+        z-index: 32;
+        background: #fff;
+        transition: transform 0.3s linear;
+        transform: translateX(100%);
+    }
+
+    .picker-minute-btn {
+        position: absolute;
+        top: 20*@rem;
+        right: -40*@rem;
+        z-index: 33;
+        width: 80*@rem;
+        height: 80*@rem;
+        border-radius: 50%;
+        line-height: 80*@rem;
+        text-align: center;
+        color: #fff;
+        background: rgba(0,0,0,0.5);
+        transition: all 0.3s linear;
+
+        &:after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-top: 20*@rem solid transparent;
+            border-bottom: 20*@rem solid transparent;
+            border-right: 20*@rem solid #fff;
+            margin: 20*@rem 18*@rem;
+
+        }
+
+    }
+
+    .picker-minute-btn-act {
+        left: -40*@rem;
+        transform: rotate(180deg);
     }
 
     .date-content {

@@ -51,3 +51,94 @@ export const rangePicker = `
 </div>
 `;
 
+export const singlePicker = `
+<div class="picker-wrapper picker-type__single">
+    <div class="picker-head flex space-between">
+        <span class="cancel picker-btn__cancel">取消</span>
+        <span class="sure picker-btn__sure">确定</span>
+    </div>
+    <div class="picker-body">
+        <div class="date-content flex">
+
+            <div class="date-group flex-item">
+                    <div class="content-mask mask-top"></div>
+                    <div class="content-mask mask-bottom"></div>
+                    <div class="date-item ">
+                        $1
+                    </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    $2
+                </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    $3
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+`;
+
+export const minutePicker = `
+<div class="picker-wrapper picker-type__minute">
+    <div class="picker-head flex space-between">
+        <span class="cancel picker-btn__cancel">取消</span>
+        <span class="sure picker-btn__sure">确定</span>
+    </div>
+    <div class="picker-body">
+        <div class="date-content flex">
+
+            <div class="date-group flex-item">
+                    <div class="content-mask mask-top"></div>
+                    <div class="content-mask mask-bottom"></div>
+                    <div class="date-item ">
+                        $1
+                    </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    $2
+                </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    $3
+                </div>
+            </div>
+        </div>
+
+        <span class="picker-minute-btn"></span>
+        <div class="date-content date-content-minute flex">
+            
+            <div class="date-group flex-item">
+                    <div class="content-mask mask-top"></div>
+                    <div class="content-mask mask-bottom"></div>
+                    <div class="date-item ">
+                        $4
+                    </div>
+            </div>
+            <div class="date-group flex-item">
+                <div class="content-mask mask-top"></div>
+                <div class="content-mask mask-bottom"></div>
+                <div class="date-item">
+                    $5
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+`
+

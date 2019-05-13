@@ -4,6 +4,8 @@ polyfill();
 import Utils from './utils';
 import BasePicker from './basePicker';
 import RangePicker from './rangePicker';
+import SinglePicker from './singlePicker';
+import MinutePicker from './minutePicker';
 
 
 interface globalOpt {
@@ -90,10 +92,13 @@ class DatePicker extends Utils{
     }
 
     public picker(params?: pickers){
+        console.log('params',params.type)
+        let defaultDate = params.type == 'minute'? this.getToday('-')+' 00:00': this.getToday('-');
+        console.log('defaultDate',defaultDate)
         this.params = this.assign({ 
             startYear: '1990',
             endYear: '2030',
-            defaultDate: this.getToday('-'),
+            defaultDate: defaultDate,
             key: this.key,
             outFormat: '-',
             onchange: ()=>{},
@@ -149,6 +154,13 @@ class DatePicker extends Utils{
         switch (this.params.type) {
             case 'range':
                 picker = new RangePicker(this.opt);
+                break;
+            
+            case 'single':
+                picker = new SinglePicker(this.opt);
+                break;
+            case 'minute':
+                picker = new MinutePicker(this.opt);
                 break;
         
             default:

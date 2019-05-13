@@ -14,7 +14,7 @@ interface pickers {
         outFormat ?: string;
         onchange?: Function; 
         success?: Function;
-        type?: string; //选择器类型：single, range, 
+        type?: string; //选择器类型：single, range, minute
 
 }
 
@@ -347,6 +347,12 @@ export default abstract class BasePicker extends Utils {
                 // Todo
                 counts = this.getDay();
                 break;
+            case 3: //小时
+                counts = 24;
+                break;
+            case 4: //分钟
+                counts = 60;
+                break;
         
             default:
                 break;
@@ -367,8 +373,11 @@ export default abstract class BasePicker extends Utils {
         if(Index==0){
             // 只有年需要从数组中读取值
             this.currentValue[Index] = this.currentPicker.years[arrayIndex];
-        }else{
+        }else if(Index==1 || Index==2){
             this.currentValue[Index] = arrayIndex+1>=10?arrayIndex+1:'0'+(arrayIndex+1);
+        }else{
+            this.currentValue[Index] = arrayIndex>=10?arrayIndex:'0'+arrayIndex;
+
         }
         this.setCss(target,{
             'transition':'.3s all linear',

@@ -145,7 +145,7 @@ export default class Touchs extends Utils {
         let rangeTime = (this._endTime - this._startTime)/1000;//单位: 秒
         if(this.endY!==0){
 
-            let space = Math.floor(Math.abs(this.endY)/(rangeTime*5));
+            let space = Math.floor(Math.abs(this.endY)/(rangeTime*3));
             this.endY = this.endY>0? this.endY+space: this.endY-space;
 
         }

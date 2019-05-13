@@ -1,4 +1,4 @@
-// 范围选择器核心代码
+// 单个选择器核心代码
 import * as temp from './template';
 import BasePicker from './basePicker';
 
@@ -17,7 +17,7 @@ export default class RangePicker extends BasePicker {
     public renderHtml(): string{
         // 获取html样式的函数，注意，该函数一般要在子类重写
         let yearStr = this.createYearStr();
-        return temp.rangePicker.replace('$1',yearStr)
+        return temp.singlePicker.replace('$1',yearStr)
                             .replace('$2',this.monthStr)
                             .replace('$3',this.dayStr);
     }
@@ -25,44 +25,11 @@ export default class RangePicker extends BasePicker {
     public pickerOperation(){
         // 时间区间选择器的逻辑事件
         let $picker = this.currentPicker;
-        let $rangeChilds = this.selectAll('.range-child',$picker);
         let _this = this;
-        Array.prototype.slice.call($rangeChilds).forEach((rangeChild,i)=>{
-            console.log('rangeChild',rangeChild);
-            rangeChild.addEventListener('click',(e)=>{
-                console.log(e)
-                if(e.target.classList.contains('range-act'))return;
-                Array.prototype.slice.call($rangeChilds).forEach(item => {
-
-                    item.classList.remove('range-act')
-                });
-
-                e.target.classList.add('range-act');
-                _this.currentIndex = i;
-            })
-        });
-
-        // 当设置了默认日期，会执行这个
-        $rangeChilds[_this.currentIndex].innerHTML = this.defaultInfo.dateArray.join(this.params.outFormat);
-
-        // 订阅事件，监听选择器的变化，修改开始和结束的时间显示
-        let startTime ='', endTime = '';
+        // 订阅事件，监听选择器的变化
+        let selectTime ='';
         this.$on(`onchange_${this.params.key}`,(data)=>{
-            if(typeof data === 'string'){
-
-                $rangeChilds[_this.currentIndex].innerHTML = data;
-                if(_this.currentIndex==0){
-                    // 开始日期
-                    startTime = data; 
-                }else{
-                    endTime = data;
-                }
-            }else {
-                $rangeChilds[0].innerHTML = data[0];
-                $rangeChilds[1].innerHTML = data[1];
-                startTime = data[1];
-                endTime = data[2];
-            }
+            selectTime = data;
 
         });
 
@@ -78,15 +45,7 @@ export default class RangePicker extends BasePicker {
             return;
         }
         $sure.addEventListener('click',(e)=>{
-            if(new Date(endTime).getTime()<new Date(startTime).getTime()){
-                let tip = `开始日期不能大于结束日期`;
-                this.errorTip(tip);
-                return;
-            }
-            let result = { 
-                startTime,
-                endTime
-            }
+            let result = selectTime;
             _this.opt.success(result);
             _this.params.success(result);
 
@@ -112,16 +71,14 @@ export default class RangePicker extends BasePicker {
 
     }
 
-    public reView(date: Array<string>){
+    public reView(date: string){
         // 重置选择器距离，date=[开始时间，结束时间]
         let bool = true;
         let _this = this;
-        date.forEach((item,i)=>{
-            let strArray = item.split(_this.params.outFormat);
-            bool = strArray.length<3? false: true;
-        })
+        let strArray = date.split(_this.params.outFormat);
+        bool = strArray.length<3? false: true;
         if(!bool){
-            console.error('Error: reView方法传入的参数数组格式不对');
+            console.error('Error: reView方法传入的参数字符格式不对');
             return;
         }
         this.setDefaultView(date[this.currentIndex]);
