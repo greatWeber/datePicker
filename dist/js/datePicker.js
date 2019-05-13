@@ -477,6 +477,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var polyfill_1 = require("./polyfill");
 polyfill_1.default();
 var utils_1 = require("./utils");
+// import BasePicker from './basePicker';
 var rangePicker_1 = require("./rangePicker");
 var singlePicker_1 = require("./singlePicker");
 var minutePicker_1 = require("./minutePicker");
@@ -627,41 +628,10 @@ exports.default = datePicker;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var datePicker_1 = require("./datePicker");
-datePicker_1.default.globalOptions({
-    success: function success(data) {
-        console.log(data);
-    }
-});
-var picker1 = datePicker_1.default.picker({
-    onchange: function onchange(data) {
-        console.log('onchange', data);
-    },
-    success: function success(data) {
-        picker1.reView(['2019-01-01', '2020-01-01']);
-    }
-});
-var picker2 = datePicker_1.default.picker({
-    type: 'single',
-    onchange: function onchange(data) {
-        console.log('onchange', data);
-    }
-});
-var picker3 = datePicker_1.default.picker({
-    type: 'minute',
-    onchange: function onchange(data) {
-        console.log('onchange', data);
-    }
-});
-document.getElementsByClassName('picker')[0].addEventListener('click', function () {
-    console.log('click');
-    picker1.show();
-});
-document.getElementsByClassName('picker')[1].addEventListener('click', function () {
-    picker2.show();
-});
-document.getElementsByClassName('picker')[2].addEventListener('click', function () {
-    picker3.show();
-});
+// import { module } from 'browserify/lib/builtins';
+window.datePicker = datePicker_1.default;
+// console.log(datePicker);
+// module.exports = datePicker;
 
 },{"./datePicker":2}],4:[function(require,module,exports){
 "use strict";
@@ -675,17 +645,17 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Object.defineProperty(exports, "__esModule", { value: true });
-// 范围选择器核心代码
+// 时分选择器核心代码
 var temp = require("./template");
 var basePicker_1 = require("./basePicker");
 
-var RangePicker = function (_basePicker_1$default) {
-    _inherits(RangePicker, _basePicker_1$default);
+var SinglePicker = function (_basePicker_1$default) {
+    _inherits(SinglePicker, _basePicker_1$default);
 
-    function RangePicker(options) {
-        _classCallCheck(this, RangePicker);
+    function SinglePicker(options) {
+        _classCallCheck(this, SinglePicker);
 
-        var _this2 = _possibleConstructorReturn(this, (RangePicker.__proto__ || Object.getPrototypeOf(RangePicker)).call(this));
+        var _this2 = _possibleConstructorReturn(this, (SinglePicker.__proto__ || Object.getPrototypeOf(SinglePicker)).call(this));
 
         _this2.currentIndex = 0;
         _this2.opt = _this2.assign({
@@ -695,7 +665,7 @@ var RangePicker = function (_basePicker_1$default) {
         return _this2;
     }
 
-    _createClass(RangePicker, [{
+    _createClass(SinglePicker, [{
         key: "renderHtml",
         value: function renderHtml() {
             // 获取html样式的函数，注意，该函数一般要在子类重写
@@ -870,10 +840,10 @@ var RangePicker = function (_basePicker_1$default) {
         }
     }]);
 
-    return RangePicker;
+    return SinglePicker;
 }(basePicker_1.default);
 
-exports.default = RangePicker;
+exports.default = SinglePicker;
 
 },{"./basePicker":1,"./template":8}],5:[function(require,module,exports){
 'use strict';
@@ -1109,13 +1079,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var temp = require("./template");
 var basePicker_1 = require("./basePicker");
 
-var RangePicker = function (_basePicker_1$default) {
-    _inherits(RangePicker, _basePicker_1$default);
+var SinglePicker = function (_basePicker_1$default) {
+    _inherits(SinglePicker, _basePicker_1$default);
 
-    function RangePicker(options) {
-        _classCallCheck(this, RangePicker);
+    function SinglePicker(options) {
+        _classCallCheck(this, SinglePicker);
 
-        var _this2 = _possibleConstructorReturn(this, (RangePicker.__proto__ || Object.getPrototypeOf(RangePicker)).call(this));
+        var _this2 = _possibleConstructorReturn(this, (SinglePicker.__proto__ || Object.getPrototypeOf(SinglePicker)).call(this));
 
         _this2.currentIndex = 0;
         _this2.opt = _this2.assign({
@@ -1125,7 +1095,7 @@ var RangePicker = function (_basePicker_1$default) {
         return _this2;
     }
 
-    _createClass(RangePicker, [{
+    _createClass(SinglePicker, [{
         key: "renderHtml",
         value: function renderHtml() {
             // 获取html样式的函数，注意，该函数一般要在子类重写
@@ -1186,10 +1156,10 @@ var RangePicker = function (_basePicker_1$default) {
         }
     }]);
 
-    return RangePicker;
+    return SinglePicker;
 }(basePicker_1.default);
 
-exports.default = RangePicker;
+exports.default = SinglePicker;
 
 },{"./basePicker":1,"./template":8}],8:[function(require,module,exports){
 "use strict";

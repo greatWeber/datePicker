@@ -1,8 +1,8 @@
-// 范围选择器核心代码
+// 时分选择器核心代码
 import * as temp from './template';
 import BasePicker from './basePicker';
 
-export default class RangePicker extends BasePicker {
+export default class SinglePicker extends BasePicker {
     private currentIndex :number = 0;
     constructor(options?: object){  
         super();  

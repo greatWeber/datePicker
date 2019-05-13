@@ -2,7 +2,7 @@
 import polyfill from  './polyfill'; 
 polyfill();  
 import Utils from './utils';
-import BasePicker from './basePicker';
+// import BasePicker from './basePicker';
 import RangePicker from './rangePicker';
 import SinglePicker from './singlePicker';
 import MinutePicker from './minutePicker';
@@ -171,6 +171,6 @@ class DatePicker extends Utils{
 
 }
 
-const datePicker = new DatePicker();
+const datePicker = new DatePicker(); 
 
-export default datePicker;
+export default datePicker; 

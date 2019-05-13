@@ -2,7 +2,7 @@
 import * as temp from './template';
 import BasePicker from './basePicker';
 
-export default class RangePicker extends BasePicker {
+export default class SinglePicker extends BasePicker {
     private currentIndex :number = 0;
     constructor(options?: object){  
         super();  
@@ -17,7 +17,7 @@ export default class RangePicker extends BasePicker {
     public renderHtml(): string{
         // 获取html样式的函数，注意，该函数一般要在子类重写
         let yearStr = this.createYearStr();
-        return temp.singlePicker.replace('$1',yearStr)
+        return temp.singlePicker.replace('$1',yearStr) 
                             .replace('$2',this.monthStr)
                             .replace('$3',this.dayStr);
     }

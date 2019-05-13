@@ -26,6 +26,10 @@ let changed = require('gulp-changed');
 
 let plumber = require('gulp-plumber');
 
+let uglify = require('gulp-uglify');
+
+let rename = require('gulp-rename');
+
 
 let pathSrc = {
     ts: 'src/ts/**.ts',
@@ -47,7 +51,8 @@ const Ts = function () {
         debug: true,
         entries: ['src/ts/index.ts'],
         cache: {},
-        packageCache: {}
+        packageCache: {},
+        // standalone: 'datePicker'
     })
     .plugin(tsify)
     .transform('babelify', {
@@ -56,7 +61,7 @@ const Ts = function () {
     })
     .bundle()
     .pipe(plumber())
-    .pipe(source('datePicker.js'))
+    .pipe(source('datePicker.js'))  
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(sourcemaps.write('./'))
@@ -64,6 +69,15 @@ const Ts = function () {
 };
 
 gulp.task('ts',  Ts);
+
+const Zip = () => {
+    return gulp.src(pathDist.ts+'/**.js')
+            .pipe(uglify())//压缩js
+            .pipe(rename({suffix:'.min'}))
+            .pipe(gulp.dest(pathDist.ts));
+}
+
+gulp.task('zip', Zip);
 
 const Less = () => {
     return gulp.src(pathSrc.less)
