@@ -28,12 +28,16 @@ let plumber = require('gulp-plumber');
 
 let uglify = require('gulp-uglify');
 
+let minifyCss = require('gulp-minify-css');
+
 let rename = require('gulp-rename');
+
+let del = require('del');
 
 
 let pathSrc = {
     ts: 'src/ts/**.ts',
-    less: 'src/less/**.less'
+    less: 'src/less/[^_]**.less'
 };
 
 let pathDist= {
@@ -63,21 +67,39 @@ const Ts = function () {
     .pipe(plumber())
     .pipe(source('datePicker.js'))  
     .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
+    
+    .pipe(sourcemaps.init({loadMaps: false}))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(pathDist.ts));
 };
 
 gulp.task('ts',  Ts);
 
-const Zip = () => {
+const ZipCss = () => {
+    
+    return gulp.src(pathDist.less+'/**.css')
+            .pipe(minifyCss())//压缩js
+            .pipe(rename({suffix:'.min'}))
+            .pipe(gulp.dest(pathDist.less));
+}
+
+const ZipJs = () => {
+    
     return gulp.src(pathDist.ts+'/**.js')
             .pipe(uglify())//压缩js
             .pipe(rename({suffix:'.min'}))
             .pipe(gulp.dest(pathDist.ts));
 }
 
-gulp.task('zip', Zip);
+gulp.task('zipJs',ZipJs);
+gulp.task('zipCss',ZipCss);
+
+const Del = () => {
+    return del(pathDist.ts+'/**.min.js');
+}
+gulp.task('Del', Del);
+
+gulp.task('zip', gulp.series('Del', gulp.parallel('zipJs','zipCss')));
 
 const Less = () => {
     return gulp.src(pathSrc.less)
