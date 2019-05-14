@@ -54,7 +54,7 @@ export default class Utils {
             this._eventLists[eventName].push(fn);
         }else{
             this._eventLists[eventName] = [fn];
-            console.log('eventLists',this._eventLists[eventName]);
+            // console.log('eventLists',this._eventLists[eventName]);
         }
     }
 

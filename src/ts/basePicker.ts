@@ -284,19 +284,9 @@ export default abstract class BasePicker extends Utils {
                 },
                 endCb: (e:any, endY: number)=>{
                     EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i);
-                    console.log('touchEnd',EndY) 
+                    // console.log('touchEnd',EndY) 
                 }
             })
-            // touchs.touchStart((e: any, range: number)=>{
-            //     _this.touchStart(e,$dateUtils);
-            // });
-            // touchs.touchMove((e: any, range: number)=>{
-            //     _this.touchMove(e,range,EndY,$dateUtils); 
-            // });
-            // touchs.touchEnd((e:any, endY: number)=>{
-            //     EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
-            //     console.log('touchEnd',EndY)
-            // })
         });
 
         this.mask.addEventListener('click',this.hide.bind(_this));
@@ -304,7 +294,7 @@ export default abstract class BasePicker extends Utils {
     }
 
     private touchStart(e: any, target: any){
-        console.log('start');
+        // console.log('start');
         this.setCss(target,{
             'transition':'.3s all linear',
         });
@@ -397,7 +387,7 @@ export default abstract class BasePicker extends Utils {
         // 获取当月的天数
         let _this = this;
         let days = new Date(this.currentValue[0],this.currentValue[1],0).getDate();
-        console.log('days',days);
+        // console.log('days',days);
         let $untis = this.selectAll('[data-day]',this.currentPicker);
         const fade = (index,opacity)=>{
             for(var i = 30; i>=index;i--){

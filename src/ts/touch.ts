@@ -22,7 +22,7 @@ export default class Touchs extends Utils {
 
     constructor(target: any){
         super();
-        console.log('init')
+        // console.log('init')
         this._target = target;
         this.touchName = {
             start: this._supportTouch? 'touchstart':'mousedown',
@@ -92,7 +92,7 @@ export default class Touchs extends Utils {
     private touchStart(){
         // touchstart:
         // 1. 给target绑定touch事件
-        console.log(this.target)  
+        // console.log(this.target)  
         let _this = this;
         this._touchStartHander = this.binds(this,this.touchStartHander);
         this._touchMoveHander = this.binds(this,this.touchMoveHander);

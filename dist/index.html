@@ -7,135 +7,98 @@
     <title>Document</title>
     <link rel="stylesheet" href="./css/datePicker.css">
     <script src="./plug/flexible.js"></script>
+    <style>
+        .list-wrapper {
+            width: 100%;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .list-item {
+            line-height: 50px;
+            padding: 0 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .list-item .name {
+            color: #333;
+        }
+
+    </style>
 </head>
 <body>
-<!-- <div class="picker-mask"></div>
-
-<div class="picker-wrapper">
-    <div class="picker-head flex space-between">
-        <span class="cancel">取消</span>
-        <span class="sure">确定</span>
+<div id="index">
+    <div class="list-wrapper">
+        <p class="list-item flex space-between" v-for="(picker,i) in list" :key="i">
+            <span class="picker" @click="showPicker(i)">{{picker.name}}</span>
+            <span class="time">{{picker.time}}</span>
+        </p>
     </div>
-    <div class="picker-body">
-        <div class="picker-range">
-            <p class="start-time">2018-03-01</p>
-            <span>至</span>
-            <p class="end-time range-act">结束日期</p>
-        </div>
-
-        <div class="date-content flex">
-
-            <div class="date-group flex-item">
-                    <div class="content-mask mask-top"></div>
-                    <div class="content-mask mask-bottom"></div>
-                    <div class="date-item ">
-                        <p class="date-unit">2017年</p>
-                        <p class="date-unit">2018年</p>
-                        <p class="date-unit">2019年</p>
-                        <p class="date-unit">2019年</p>
-                    </div>
-            </div>
-            <div class="date-group flex-item">
-                <div class="content-mask mask-top"></div>
-                <div class="content-mask mask-bottom"></div>
-                <div class="date-item">
-                    <p class="date-unit">2017年</p>
-                    <p class="date-unit">2018年</p>
-                    <p class="date-unit">2019年</p>
-                    <p class="date-unit">2019年</p>
-                </div>
-            </div>
-            <div class="date-group flex-item">
-                <div class="content-mask mask-top"></div>
-                <div class="content-mask mask-bottom"></div>
-                <div class="date-item">
-                    <p class="date-unit">2017年</p>
-                    <p class="date-unit">2018年</p>
-                    <p class="date-unit">2019年</p>
-                    <p class="date-unit">2019年</p>
-                </div>
-            </div>
-        </div>
-        <span class="picker-minute-btn"><</span>
-        <div class="date-content date-content-minute flex">
-            
-            <div class="date-group flex-item">
-                    <div class="content-mask mask-top"></div>
-                    <div class="content-mask mask-bottom"></div>
-                    <div class="date-item ">
-                        <p class="date-unit">2017年</p>
-                        <p class="date-unit">2018年</p>
-                        <p class="date-unit">2019年</p>
-                        <p class="date-unit">2019年</p>
-                    </div>
-            </div>
-            <div class="date-group flex-item">
-                <div class="content-mask mask-top"></div>
-                <div class="content-mask mask-bottom"></div>
-                <div class="date-item">
-                    <p class="date-unit">2017年</p>
-                    <p class="date-unit">2018年</p>
-                    <p class="date-unit">2019年</p>
-                    <p class="date-unit">2019年</p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div> -->
-<!-- <div class="datePicker-errorTip">错误提示</div> -->
-
-<button class="picker">js调用picker</button>
-<button class="picker">js调用picker</button>
-<button class="picker">js调用picker</button>
-<script src="./plug/vconsole.min.js"></script>
+</div>
+<!-- <script src="./plug/vconsole.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script src="./js/datePicker.js"></script>
 <script>
-// var datePicker = require('datePicker');
 console.log('ontouchend',"ontouchend" in document);
-datePicker.globalOptions({
-    success: (data)=>{
-        console.log(data);
-    }
-})
-let picker1 = datePicker.picker({
-    onchange:(data)=>{
-        console.log('onchange',data);
+var vue = new Vue({
+    el: '#index',
+    data: {
+        list:[
+            {
+                name: '范围选择器',
+                time: '',
+                picker: null
+            },
+            {
+                name: '单个选择器',
+                time: '',
+                picker: null
+            },
+            {
+                name: '时分选择器',
+                time: '',
+                picker: null
+            }
+        ]
     },
-    success: (data)=>{
-        picker1.reView(['2019-01-01','2020-01-01']);
+    created(){
+        // 初始化
+        datePicker.globalOptions({
+            success: (data)=>{
+                console.log(data);
+            }
+        });
+        let _this = this;
+        this.list[0].picker = datePicker.picker({
+            success: (data)=>{
+                _this.list[0].time = data.startTime+' : '+data.endTime;
+                _this.list[0].picker.reView(['2019-01-01','2020-01-01']);
+            }
+        });
+
+        this.list[1].picker = datePicker.picker({
+            type: 'single',
+            success: (data)=>{
+                _this.list[1].time = data;
+            }
+        });
+
+        this.list[2].picker = datePicker.picker({
+            type: 'minute',
+            success: (data)=>{
+                _this.list[2].time = data;
+            }
+        });
+    },
+
+    methods: {
+        showPicker(i){
+            this.list[i].picker.show();
+        }
     }
-});
-
-let picker2 = datePicker.picker({
-    type: 'single',
-    onchange:(data)=>{
-        console.log('onchange',data);
-    }
-});
-
-let picker3 = datePicker.picker({
-    type: 'minute',
-    onchange:(data)=>{
-        console.log('onchange',data);
-    }
-});
-
-
-document.getElementsByClassName('picker')[0].addEventListener('click',()=>{
-    console.log('click')
-    picker1.show();
 })
 
-document.getElementsByClassName('picker')[1].addEventListener('click',()=>{
 
-    picker2.show(); 
-})
-
-document.getElementsByClassName('picker')[2].addEventListener('click',()=>{
-
-    picker3.show(); 
-})
 </script>
 </body>
 </html>

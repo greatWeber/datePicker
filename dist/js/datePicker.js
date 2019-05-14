@@ -240,26 +240,16 @@ var BasePicker = function (_utils_1$default) {
                     },
                     endCb: function endCb(e, endY) {
                         EndY = _this.touchEnd(e, endY, EndY, $dateUtils, i);
-                        console.log('touchEnd', EndY);
+                        // console.log('touchEnd',EndY) 
                     }
                 });
-                // touchs.touchStart((e: any, range: number)=>{
-                //     _this.touchStart(e,$dateUtils);
-                // });
-                // touchs.touchMove((e: any, range: number)=>{
-                //     _this.touchMove(e,range,EndY,$dateUtils); 
-                // });
-                // touchs.touchEnd((e:any, endY: number)=>{
-                //     EndY = _this.touchEnd(e,endY,EndY, $dateUtils,i,defaultInfo.dateArray);
-                //     console.log('touchEnd',EndY)
-                // })
             });
             this.mask.addEventListener('click', this.hide.bind(_this));
         }
     }, {
         key: "touchStart",
         value: function touchStart(e, target) {
-            console.log('start');
+            // console.log('start');
             this.setCss(target, {
                 'transition': '.3s all linear'
             });
@@ -356,7 +346,7 @@ var BasePicker = function (_utils_1$default) {
             // 获取当月的天数
             var _this = this;
             var days = new Date(this.currentValue[0], this.currentValue[1], 0).getDate();
-            console.log('days', days);
+            // console.log('days',days);
             var $untis = this.selectAll('[data-day]', this.currentPicker);
             var fade = function fade(index, opacity) {
                 for (var i = 30; i >= index; i--) {
@@ -515,9 +505,7 @@ var DatePicker = function (_utils_1$default) {
         value: function picker(params) {
             var _this2 = this;
 
-            console.log('params', params.type);
             var defaultDate = params.type == 'minute' ? this.getToday('-') + ' 00:00' : this.getToday('-');
-            console.log('defaultDate', defaultDate);
             this.params = this.assign({
                 startYear: '1990',
                 endYear: '2030',
@@ -719,7 +707,6 @@ var SinglePicker = function (_basePicker_1$default) {
                 return;
             }
             var dateArray = this.resolvingString(defaultDate);
-            console.log('-----------------', dateArray);
             if (!dateArray || dateArray.length < 5) {
                 console.error('Error:默认日期(defaultDate)的格式有误,默认格式:2019-01-01 00:00');
                 return;
@@ -973,9 +960,9 @@ var RangePicker = function (_basePicker_1$default) {
             var $rangeChilds = this.selectAll('.range-child', $picker);
             var _this = this;
             Array.prototype.slice.call($rangeChilds).forEach(function (rangeChild, i) {
-                console.log('rangeChild', rangeChild);
+                // console.log('rangeChild',rangeChild);
                 rangeChild.addEventListener('click', function (e) {
-                    console.log(e);
+                    // console.log(e)
                     if (e.target.classList.contains('range-act')) return;
                     Array.prototype.slice.call($rangeChilds).forEach(function (item) {
                         item.classList.remove('range-act');
@@ -984,11 +971,11 @@ var RangePicker = function (_basePicker_1$default) {
                     _this.currentIndex = i;
                 });
             });
-            // 当设置了默认日期，会执行这个
-            $rangeChilds[_this.currentIndex].innerHTML = this.defaultInfo.dateArray.join(this.params.outFormat);
             // 订阅事件，监听选择器的变化，修改开始和结束的时间显示
             var startTime = '',
                 endTime = '';
+            // 当设置了默认日期，会执行这个
+            startTime = $rangeChilds[_this.currentIndex].innerHTML = this.defaultInfo.dateArray.join(this.params.outFormat);
             this.$on("onchange_" + this.params.key, function (data) {
                 if (typeof data === 'string') {
                     $rangeChilds[_this.currentIndex].innerHTML = data;
@@ -1001,8 +988,8 @@ var RangePicker = function (_basePicker_1$default) {
                 } else {
                     $rangeChilds[0].innerHTML = data[0];
                     $rangeChilds[1].innerHTML = data[1];
-                    startTime = data[1];
-                    endTime = data[2];
+                    startTime = data[0];
+                    endTime = data[1];
                 }
             });
             // 确定按钮
@@ -1208,7 +1195,7 @@ var Touchs = function (_utils_1$default) {
         _this2._touchStartHander = null;
         _this2._touchMoveHander = null;
         _this2._touchEndHander = null;
-        console.log('init');
+        // console.log('init')
         _this2._target = target;
         _this2.touchName = {
             start: _this2._supportTouch ? 'touchstart' : 'mousedown',
@@ -1242,7 +1229,7 @@ var Touchs = function (_utils_1$default) {
         value: function touchStart() {
             // touchstart:
             // 1. 给target绑定touch事件
-            console.log(this.target);
+            // console.log(this.target)  
             var _this = this;
             this._touchStartHander = this.binds(this, this.touchStartHander);
             this._touchMoveHander = this.binds(this, this.touchMoveHander);
@@ -1423,7 +1410,7 @@ var Utils = function () {
                 this._eventLists[eventName].push(fn);
             } else {
                 this._eventLists[eventName] = [fn];
-                console.log('eventLists', this._eventLists[eventName]);
+                // console.log('eventLists',this._eventLists[eventName]);
             }
         }
     }, {

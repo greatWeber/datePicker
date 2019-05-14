@@ -92,9 +92,9 @@ class DatePicker extends Utils{
     }
 
     public picker(params?: pickers){
-        console.log('params',params.type)
+
         let defaultDate = params.type == 'minute'? this.getToday('-')+' 00:00': this.getToday('-');
-        console.log('defaultDate',defaultDate)
+
         this.params = this.assign({ 
             startYear: '1990',
             endYear: '2030',

@@ -28,9 +28,9 @@ export default class RangePicker extends BasePicker {
         let $rangeChilds = this.selectAll('.range-child',$picker);
         let _this = this;
         Array.prototype.slice.call($rangeChilds).forEach((rangeChild,i)=>{
-            console.log('rangeChild',rangeChild);
+            // console.log('rangeChild',rangeChild);
             rangeChild.addEventListener('click',(e)=>{
-                console.log(e)
+                // console.log(e)
                 if(e.target.classList.contains('range-act'))return;
                 Array.prototype.slice.call($rangeChilds).forEach(item => {
 
@@ -42,11 +42,14 @@ export default class RangePicker extends BasePicker {
             })
         });
 
-        // 当设置了默认日期，会执行这个
-        $rangeChilds[_this.currentIndex].innerHTML = this.defaultInfo.dateArray.join(this.params.outFormat);
-
+        
         // 订阅事件，监听选择器的变化，修改开始和结束的时间显示
         let startTime ='', endTime = '';
+
+        // 当设置了默认日期，会执行这个
+        startTime = $rangeChilds[_this.currentIndex].innerHTML = this.defaultInfo.dateArray.join(this.params.outFormat);
+ 
+
         this.$on(`onchange_${this.params.key}`,(data)=>{
             if(typeof data === 'string'){
 
@@ -60,8 +63,8 @@ export default class RangePicker extends BasePicker {
             }else {
                 $rangeChilds[0].innerHTML = data[0];
                 $rangeChilds[1].innerHTML = data[1];
-                startTime = data[1];
-                endTime = data[2];
+                startTime = data[0];
+                endTime = data[1]; 
             }
 
         });

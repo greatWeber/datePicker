@@ -66,7 +66,6 @@ export default class SinglePicker extends BasePicker {
             return;
         }
         let dateArray = this.resolvingString(defaultDate)
-        console.log('-----------------',dateArray)
         if(!dateArray || dateArray.length<5){
             console.error('Error:默认日期(defaultDate)的格式有误,默认格式:2019-01-01 00:00');
             return;
