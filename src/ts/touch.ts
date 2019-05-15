@@ -102,7 +102,8 @@ export default class Touchs extends Utils {
     }
 
     private touchStartHander(){
-        let e = arguments[0]
+        let e = arguments[0];
+        e.preventDefault();
         this.startY = this._supportTouch?e.touches[0].pageY: e.pageY;
         this._startTime = new Date().getTime();
         this._startCb(e);
@@ -110,11 +111,11 @@ export default class Touchs extends Utils {
         this.target.addEventListener(this.touchName.end,this._touchEndHander,false);
         this.target.addEventListener('touchcancel',this._touchEndHander,false);
     }
- 
+  
 
     private touchMoveHander(){
         let e = arguments[0];
-        e.stopPropagation();
+        // e.stopPropagation();
         e.preventDefault();
         // 限流-start
         this.limit++;
